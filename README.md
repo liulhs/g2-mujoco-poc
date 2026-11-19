@@ -75,5 +75,6 @@ The following are **not done yet**:
 - `sim/gdk/`: the real-robot runner and its tests.
 - `sim/legacy_single_arm/`: the earlier single-arm plan, now superseded.
 - `docs/G2_POC_plan.md`: the plan notes, in Chinese.
+- `docs/HANDOFF.md`: handoff notes for the scripts (Chinese).
 
 See `THIRD_PARTY_NOTICES.md` for the official model, `coupled_constraints.yaml` and GDK licensing.
