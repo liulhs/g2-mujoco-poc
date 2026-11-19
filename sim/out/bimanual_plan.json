@@ -1,0 +1,4590 @@
+{
+  "task": "bimanual cup-carry-pour with driving chassis",
+  "robot": "AgiBot G2, crs arms, Omnipicker x2",
+  "expected_arm": "crs",
+  "model_source": {
+    "repo": "github.com/AgibotTech/genie_sim_robot_model",
+    "commit": "fb6de335f6a293605204a17608cf0b22b1fef6de",
+    "xacro": "robots/genie/g2/g2_crs_omnipicker.urdf.xacro",
+    "collision_type": "fine"
+  },
+  "units": {
+    "joints": "rad",
+    "base_x_y": "m (world, room origin)",
+    "base_yaw": "rad",
+    "gripper": "omnipicker -0.785 open .. 0 closed"
+  },
+  "layout": {
+    "measured": false,
+    "stations_in_deg": {
+      "start": [
+        84.0,
+        60.0,
+        90.0
+      ],
+      "bin": [
+        112.0,
+        60.0,
+        0.0
+      ],
+      "bin_backoff": [
+        103.0,
+        60.0,
+        0.0
+      ],
+      "turn_point": [
+        103.0,
+        105.5,
+        90.0
+      ],
+      "hopper_standoff": [
+        103.0,
+        105.5,
+        180.0
+      ],
+      "hopper_dock": [
+        89.0,
+        105.5,
+        180.0
+      ],
+      "home_turn": [
+        103.0,
+        60.0,
+        270.0
+      ]
+    },
+    "overhead_frame_modelled": false,
+    "assumed": {
+      "bin_height_in": 30.0,
+      "frame_top_in": 63.0,
+      "frame_beam_depth_in": 0.0,
+      "frame_posts": "not modelled"
+    }
+  },
+  "clearance_required_m": {
+    "env": 0.05,
+    "self": 0.02,
+    "hands": 0.005
+  },
+  "chassis_pose_budget": {
+    "m": 0.03,
+    "deg": 2.0,
+    "note": "station arm legs keep >= env clearance with the chassis this far off; the runner must verify the stop pose to within 2 cm / 2 deg"
+  },
+  "hand_posture": {
+    "gap_between_tcps_m": 0.11,
+    "roll": "both grippers same orientation, finger plane level (camera side up), pitched with the approach",
+    "payload": "none (demo only)"
+  },
+  "all_ok": true,
+  "waypoints": [
+    {
+      "name": "START",
+      "note": "start: hands cupped in front",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.0706,
+        1.9535,
+        1.0032
+      ],
+      "tcp_r_world_m": [
+        2.2002,
+        1.9518,
+        0.9998
+      ],
+      "approach_l": [
+        0.041,
+        0.999,
+        -0.015
+      ],
+      "approach_r": [
+        -0.066,
+        0.998,
+        0.009
+      ],
+      "check": {
+        "pos_err": 0.014,
+        "approach_err_deg": 3.7944,
+        "coupled": 0.0,
+        "tilt_deg": 9.7242,
+        "shift": 0.1309,
+        "env_clear": 0.3845,
+        "self_clear": 0.0262,
+        "hand_clear": 0.047
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.1336,
+        "base_y": 1.524,
+        "base_yaw": 1.5708,
+        "idx01_body_joint1": -0.38766,
+        "idx02_body_joint2": 0.38395,
+        "idx03_body_joint3": 0.06325,
+        "idx04_body_joint4": -0.15903,
+        "idx05_body_joint5": 0.3407,
+        "idx21_arm_l_joint1": 1.3704,
+        "idx22_arm_l_joint2": -1.54009,
+        "idx23_arm_l_joint3": -0.52299,
+        "idx24_arm_l_joint4": -1.40533,
+        "idx25_arm_l_joint5": -1.57624,
+        "idx26_arm_l_joint6": -0.64453,
+        "idx27_arm_l_joint7": 0.00063,
+        "idx61_arm_r_joint1": 1.09678,
+        "idx62_arm_r_joint2": 1.64474,
+        "idx63_arm_r_joint3": -1.74523,
+        "idx64_arm_r_joint4": -1.77281,
+        "idx65_arm_r_joint5": -1.46041,
+        "idx66_arm_r_joint6": 0.3796,
+        "idx67_arm_r_joint7": -0.41365
+      }
+    },
+    {
+      "name": "TURN_TO_BIN",
+      "note": "turn in place to face the source bin",
+      "kind": "drive",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.5631,
+        1.587,
+        1.0032
+      ],
+      "tcp_r_world_m": [
+        2.5614,
+        1.4574,
+        0.9998
+      ],
+      "approach_l": [
+        0.999,
+        -0.041,
+        -0.015
+      ],
+      "approach_r": [
+        0.998,
+        0.066,
+        0.009
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 9.7244,
+        "shift": 0.1309,
+        "env_clear": 0.3869,
+        "self_clear": 0.0262,
+        "hand_clear": 0.047
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "idx01_body_joint1": -0.38766,
+        "idx02_body_joint2": 0.38395,
+        "idx03_body_joint3": 0.06325,
+        "idx04_body_joint4": -0.15903,
+        "idx05_body_joint5": 0.3407,
+        "idx21_arm_l_joint1": 1.3704,
+        "idx22_arm_l_joint2": -1.54009,
+        "idx23_arm_l_joint3": -0.52299,
+        "idx24_arm_l_joint4": -1.40533,
+        "idx25_arm_l_joint5": -1.57624,
+        "idx26_arm_l_joint6": -0.64453,
+        "idx27_arm_l_joint7": 0.00063,
+        "idx61_arm_r_joint1": 1.09678,
+        "idx62_arm_r_joint2": 1.64474,
+        "idx63_arm_r_joint3": -1.74523,
+        "idx64_arm_r_joint4": -1.77281,
+        "idx65_arm_r_joint5": -1.46041,
+        "idx66_arm_r_joint6": 0.3796,
+        "idx67_arm_r_joint7": -0.41365,
+        "base_x": 2.1336,
+        "base_y": 1.524,
+        "base_yaw": 0.0
+      },
+      "relative_move": {
+        "dx_m": 0.0,
+        "dy_m": -0.0,
+        "dyaw_rad": -1.5708
+      },
+      "leg_check": {
+        "closest": "base_link<->hopper_base[drive]",
+        "min_env_clearance_m": 0.3337,
+        "min_self_clearance_m": 0.0262,
+        "min_hand_gap_m": 0.047,
+        "max_coupled_violation": 0.0,
+        "max_torso_tilt_deg": 9.72,
+        "max_waist_shift_m": 0.1309
+      }
+    },
+    {
+      "name": "DRIVE_TO_BIN",
+      "note": "drive forward to the source bin",
+      "kind": "drive",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        3.2743,
+        1.587,
+        1.0032
+      ],
+      "tcp_r_world_m": [
+        3.2726,
+        1.4574,
+        0.9998
+      ],
+      "approach_l": [
+        0.999,
+        -0.041,
+        -0.015
+      ],
+      "approach_r": [
+        0.998,
+        0.066,
+        0.009
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 9.7244,
+        "shift": 0.1309,
+        "env_clear": 0.1239,
+        "self_clear": 0.0262,
+        "hand_clear": 0.047
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "idx01_body_joint1": -0.38766,
+        "idx02_body_joint2": 0.38395,
+        "idx03_body_joint3": 0.06325,
+        "idx04_body_joint4": -0.15903,
+        "idx05_body_joint5": 0.3407,
+        "idx21_arm_l_joint1": 1.3704,
+        "idx22_arm_l_joint2": -1.54009,
+        "idx23_arm_l_joint3": -0.52299,
+        "idx24_arm_l_joint4": -1.40533,
+        "idx25_arm_l_joint5": -1.57624,
+        "idx26_arm_l_joint6": -0.64453,
+        "idx27_arm_l_joint7": 0.00063,
+        "idx61_arm_r_joint1": 1.09678,
+        "idx62_arm_r_joint2": 1.64474,
+        "idx63_arm_r_joint3": -1.74523,
+        "idx64_arm_r_joint4": -1.77281,
+        "idx65_arm_r_joint5": -1.46041,
+        "idx66_arm_r_joint6": 0.3796,
+        "idx67_arm_r_joint7": -0.41365,
+        "base_x": 2.8448,
+        "base_y": 1.524,
+        "base_yaw": 0.0
+      },
+      "relative_move": {
+        "dx_m": 0.7112,
+        "dy_m": 0.0,
+        "dyaw_rad": 0.0
+      },
+      "leg_check": {
+        "closest": "base_link<->bin_wall_w[drive]",
+        "min_env_clearance_m": 0.1239,
+        "min_self_clearance_m": 0.0262,
+        "min_hand_gap_m": 0.047,
+        "max_coupled_violation": 0.0,
+        "max_torso_tilt_deg": 9.72,
+        "max_waist_shift_m": 0.1309
+      }
+    },
+    {
+      "name": "PRE_SCOOP~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        3.4425,
+        1.6435,
+        0.9098
+      ],
+      "tcp_r_world_m": [
+        3.442,
+        1.4298,
+        0.9062
+      ],
+      "approach_l": [
+        0.864,
+        0.045,
+        -0.502
+      ],
+      "approach_r": [
+        0.88,
+        -0.005,
+        -0.475
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 8.1011,
+        "shift": 0.0553,
+        "env_clear": 0.0824,
+        "self_clear": 0.05,
+        "hand_clear": 0.1225
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.8448,
+        "base_y": 1.524,
+        "base_yaw": 0.0,
+        "idx01_body_joint1": -0.32854,
+        "idx02_body_joint2": 0.45185,
+        "idx03_body_joint3": -0.01609,
+        "idx04_body_joint4": -0.09234,
+        "idx05_body_joint5": 0.30044,
+        "idx21_arm_l_joint1": 1.07913,
+        "idx22_arm_l_joint2": -1.64168,
+        "idx23_arm_l_joint3": -0.68132,
+        "idx24_arm_l_joint4": -1.11703,
+        "idx25_arm_l_joint5": -1.72629,
+        "idx26_arm_l_joint6": -0.52658,
+        "idx27_arm_l_joint7": 0.44603,
+        "idx61_arm_r_joint1": 1.46683,
+        "idx62_arm_r_joint2": 1.60203,
+        "idx63_arm_r_joint3": -1.66167,
+        "idx64_arm_r_joint4": -1.63889,
+        "idx65_arm_r_joint5": -1.57921,
+        "idx66_arm_r_joint6": 0.36336,
+        "idx67_arm_r_joint7": 0.34498
+      }
+    },
+    {
+      "name": "PRE_SCOOP",
+      "note": "1 both hands above the bin, tilted down",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        3.5306,
+        1.5852,
+        0.8812
+      ],
+      "tcp_r_world_m": [
+        3.5295,
+        1.4657,
+        0.8785
+      ],
+      "approach_l": [
+        0.505,
+        -0.046,
+        -0.862
+      ],
+      "approach_r": [
+        0.52,
+        0.022,
+        -0.854
+      ],
+      "check": {
+        "pos_err": 0.0063,
+        "approach_err_deg": 2.688,
+        "coupled": 0.0,
+        "tilt_deg": 8.9957,
+        "shift": 0.0216,
+        "env_clear": 0.1218,
+        "self_clear": 0.0283,
+        "hand_clear": 0.0349
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.8448,
+        "base_y": 1.524,
+        "base_yaw": 0.0,
+        "idx01_body_joint1": -0.26941,
+        "idx02_body_joint2": 0.51975,
+        "idx03_body_joint3": -0.09543,
+        "idx04_body_joint4": -0.02565,
+        "idx05_body_joint5": 0.26017,
+        "idx21_arm_l_joint1": 0.81441,
+        "idx22_arm_l_joint2": -1.84899,
+        "idx23_arm_l_joint3": -0.84485,
+        "idx24_arm_l_joint4": -0.82873,
+        "idx25_arm_l_joint5": -1.87635,
+        "idx26_arm_l_joint6": -0.40863,
+        "idx27_arm_l_joint7": 0.89142,
+        "idx61_arm_r_joint1": 1.83282,
+        "idx62_arm_r_joint2": 1.68902,
+        "idx63_arm_r_joint3": -1.65571,
+        "idx64_arm_r_joint4": -1.53744,
+        "idx65_arm_r_joint5": -1.69801,
+        "idx66_arm_r_joint6": 0.34713,
+        "idx67_arm_r_joint7": 1.10361
+      }
+    },
+    {
+      "name": "SCOOP_IN~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        3.5846,
+        1.675,
+        0.7973
+      ],
+      "tcp_r_world_m": [
+        3.5599,
+        1.3949,
+        0.7899
+      ],
+      "approach_l": [
+        0.528,
+        0.086,
+        -0.845
+      ],
+      "approach_r": [
+        0.522,
+        -0.075,
+        -0.85
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 9.1372,
+        "shift": 0.0756,
+        "env_clear": 0.08,
+        "self_clear": 0.05,
+        "hand_clear": 0.1776
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.8448,
+        "base_y": 1.524,
+        "base_yaw": 0.0,
+        "idx01_body_joint1": -0.25595,
+        "idx02_body_joint2": 0.6423,
+        "idx03_body_joint3": -0.22823,
+        "idx04_body_joint4": -0.02089,
+        "idx05_body_joint5": 0.19109,
+        "idx21_arm_l_joint1": 0.86464,
+        "idx22_arm_l_joint2": -1.68035,
+        "idx23_arm_l_joint3": -0.85919,
+        "idx24_arm_l_joint4": -0.76736,
+        "idx25_arm_l_joint5": -1.90465,
+        "idx26_arm_l_joint6": -0.42139,
+        "idx27_arm_l_joint7": 0.71687,
+        "idx61_arm_r_joint1": 1.78207,
+        "idx62_arm_r_joint2": 1.60894,
+        "idx63_arm_r_joint3": -1.68522,
+        "idx64_arm_r_joint4": -1.36941,
+        "idx65_arm_r_joint5": -1.6387,
+        "idx66_arm_r_joint6": 0.34606,
+        "idx67_arm_r_joint7": 0.89297
+      }
+    },
+    {
+      "name": "SCOOP_IN",
+      "note": "2 dip both hands into the bin",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        3.578,
+        1.5844,
+        0.7136
+      ],
+      "tcp_r_world_m": [
+        3.5561,
+        1.4634,
+        0.7119
+      ],
+      "approach_l": [
+        0.492,
+        -0.033,
+        -0.87
+      ],
+      "approach_r": [
+        0.501,
+        0.03,
+        -0.865
+      ],
+      "check": {
+        "pos_err": 0.0227,
+        "approach_err_deg": 1.9401,
+        "coupled": 0.0,
+        "tilt_deg": 9.7145,
+        "shift": 0.1273,
+        "env_clear": 0.0574,
+        "self_clear": 0.029,
+        "hand_clear": 0.0375
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.8448,
+        "base_y": 1.524,
+        "base_yaw": 0.0,
+        "idx01_body_joint1": -0.24391,
+        "idx02_body_joint2": 0.76517,
+        "idx03_body_joint3": -0.35288,
+        "idx04_body_joint4": -0.02006,
+        "idx05_body_joint5": 0.14277,
+        "idx21_arm_l_joint1": 0.99127,
+        "idx22_arm_l_joint2": -1.76649,
+        "idx23_arm_l_joint3": -0.86261,
+        "idx24_arm_l_joint4": -0.69331,
+        "idx25_arm_l_joint5": -1.95769,
+        "idx26_arm_l_joint6": -0.4297,
+        "idx27_arm_l_joint7": 0.55553,
+        "idx61_arm_r_joint1": 1.74418,
+        "idx62_arm_r_joint2": 1.72314,
+        "idx63_arm_r_joint3": -1.76234,
+        "idx64_arm_r_joint4": -1.20136,
+        "idx65_arm_r_joint5": -1.57938,
+        "idx66_arm_r_joint6": 0.34498,
+        "idx67_arm_r_joint7": 0.68235
+      }
+    },
+    {
+      "name": "SCOOP_SWEEP~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        3.6035,
+        1.6873,
+        0.7127
+      ],
+      "tcp_r_world_m": [
+        3.5812,
+        1.376,
+        0.7141
+      ],
+      "approach_l": [
+        0.625,
+        0.106,
+        -0.773
+      ],
+      "approach_r": [
+        0.619,
+        -0.079,
+        -0.781
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 9.0181,
+        "shift": 0.127,
+        "env_clear": 0.08,
+        "self_clear": 0.05,
+        "hand_clear": 0.2069
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.8448,
+        "base_y": 1.524,
+        "base_yaw": 0.0,
+        "idx01_body_joint1": -0.24356,
+        "idx02_body_joint2": 0.77012,
+        "idx03_body_joint3": -0.37326,
+        "idx04_body_joint4": -0.03583,
+        "idx05_body_joint5": 0.14793,
+        "idx21_arm_l_joint1": 0.9945,
+        "idx22_arm_l_joint2": -1.60888,
+        "idx23_arm_l_joint3": -0.79341,
+        "idx24_arm_l_joint4": -0.7177,
+        "idx25_arm_l_joint5": -1.97062,
+        "idx26_arm_l_joint6": -0.46274,
+        "idx27_arm_l_joint7": 0.40331,
+        "idx61_arm_r_joint1": 1.70434,
+        "idx62_arm_r_joint2": 1.6022,
+        "idx63_arm_r_joint3": -1.7132,
+        "idx64_arm_r_joint4": -1.20229,
+        "idx65_arm_r_joint5": -1.54522,
+        "idx66_arm_r_joint6": 0.33319,
+        "idx67_arm_r_joint7": 0.51692
+      }
+    },
+    {
+      "name": "SCOOP_SWEEP~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        3.6021,
+        1.6444,
+        0.7257
+      ],
+      "tcp_r_world_m": [
+        3.5898,
+        1.378,
+        0.723
+      ],
+      "approach_l": [
+        0.722,
+        0.05,
+        -0.69
+      ],
+      "approach_r": [
+        0.71,
+        -0.067,
+        -0.701
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 8.9844,
+        "shift": 0.127,
+        "env_clear": 0.08,
+        "self_clear": 0.05,
+        "hand_clear": 0.17
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.8448,
+        "base_y": 1.524,
+        "base_yaw": 0.0,
+        "idx01_body_joint1": -0.24994,
+        "idx02_body_joint2": 0.78568,
+        "idx03_body_joint3": -0.38866,
+        "idx04_body_joint4": -0.05456,
+        "idx05_body_joint5": 0.16463,
+        "idx21_arm_l_joint1": 1.03311,
+        "idx22_arm_l_joint2": -1.64702,
+        "idx23_arm_l_joint3": -0.7231,
+        "idx24_arm_l_joint4": -0.73961,
+        "idx25_arm_l_joint5": -1.98865,
+        "idx26_arm_l_joint6": -0.49847,
+        "idx27_arm_l_joint7": 0.26234,
+        "idx61_arm_r_joint1": 1.66343,
+        "idx62_arm_r_joint2": 1.60195,
+        "idx63_arm_r_joint3": -1.69485,
+        "idx64_arm_r_joint4": -1.20323,
+        "idx65_arm_r_joint5": -1.51106,
+        "idx66_arm_r_joint6": 0.32139,
+        "idx67_arm_r_joint7": 0.3515
+      }
+    },
+    {
+      "name": "SCOOP_SWEEP~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        3.6165,
+        1.6229,
+        0.7604
+      ],
+      "tcp_r_world_m": [
+        3.6008,
+        1.3733,
+        0.7536
+      ],
+      "approach_l": [
+        0.826,
+        0.019,
+        -0.564
+      ],
+      "approach_r": [
+        0.809,
+        -0.065,
+        -0.584
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 8.5189,
+        "shift": 0.1238,
+        "env_clear": 0.08,
+        "self_clear": 0.05,
+        "hand_clear": 0.1573
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.8448,
+        "base_y": 1.524,
+        "base_yaw": 0.0,
+        "idx01_body_joint1": -0.25517,
+        "idx02_body_joint2": 0.79383,
+        "idx03_body_joint3": -0.40888,
+        "idx04_body_joint4": -0.07274,
+        "idx05_body_joint5": 0.16513,
+        "idx21_arm_l_joint1": 1.03403,
+        "idx22_arm_l_joint2": -1.65097,
+        "idx23_arm_l_joint3": -0.65492,
+        "idx24_arm_l_joint4": -0.75693,
+        "idx25_arm_l_joint5": -2.01449,
+        "idx26_arm_l_joint6": -0.53684,
+        "idx27_arm_l_joint7": 0.12281,
+        "idx61_arm_r_joint1": 1.6279,
+        "idx62_arm_r_joint2": 1.60258,
+        "idx63_arm_r_joint3": -1.67832,
+        "idx64_arm_r_joint4": -1.22317,
+        "idx65_arm_r_joint5": -1.46821,
+        "idx66_arm_r_joint6": 0.3096,
+        "idx67_arm_r_joint7": 0.18607
+      }
+    },
+    {
+      "name": "SCOOP_SWEEP",
+      "note": "3 scoop forward, rolling the hands up",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        3.581,
+        1.5824,
+        0.7521
+      ],
+      "tcp_r_world_m": [
+        3.5783,
+        1.4634,
+        0.7525
+      ],
+      "approach_l": [
+        0.854,
+        -0.017,
+        -0.52
+      ],
+      "approach_r": [
+        0.85,
+        0.065,
+        -0.523
+      ],
+      "check": {
+        "pos_err": 0.0123,
+        "approach_err_deg": 4.0535,
+        "coupled": 0.0,
+        "tilt_deg": 9.6888,
+        "shift": 0.1287,
+        "env_clear": 0.058,
+        "self_clear": 0.0307,
+        "hand_clear": 0.0355
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.8448,
+        "base_y": 1.524,
+        "base_yaw": 0.0,
+        "idx01_body_joint1": -0.25788,
+        "idx02_body_joint2": 0.80857,
+        "idx03_body_joint3": -0.40951,
+        "idx04_body_joint4": -0.09339,
+        "idx05_body_joint5": 0.20458,
+        "idx21_arm_l_joint1": 1.12498,
+        "idx22_arm_l_joint2": -1.70844,
+        "idx23_arm_l_joint3": -0.60989,
+        "idx24_arm_l_joint4": -0.77418,
+        "idx25_arm_l_joint5": -2.04032,
+        "idx26_arm_l_joint6": -0.5752,
+        "idx27_arm_l_joint7": -0.01671,
+        "idx61_arm_r_joint1": 1.55958,
+        "idx62_arm_r_joint2": 1.67926,
+        "idx63_arm_r_joint3": -1.7492,
+        "idx64_arm_r_joint4": -1.23619,
+        "idx65_arm_r_joint5": -1.44274,
+        "idx66_arm_r_joint6": 0.29781,
+        "idx67_arm_r_joint7": 0.02065
+      }
+    },
+    {
+      "name": "SCOOP_LIFT~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        3.5832,
+        1.6133,
+        0.841
+      ],
+      "tcp_r_world_m": [
+        3.5778,
+        1.398,
+        0.8436
+      ],
+      "approach_l": [
+        0.972,
+        -0.002,
+        -0.233
+      ],
+      "approach_r": [
+        0.971,
+        -0.017,
+        -0.24
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 6.9216,
+        "shift": 0.0939,
+        "env_clear": 0.08,
+        "self_clear": 0.05,
+        "hand_clear": 0.126
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.8448,
+        "base_y": 1.524,
+        "base_yaw": 0.0,
+        "idx01_body_joint1": -0.31415,
+        "idx02_body_joint2": 0.85509,
+        "idx03_body_joint3": -0.48656,
+        "idx04_body_joint4": -0.10793,
+        "idx05_body_joint5": 0.19694,
+        "idx21_arm_l_joint1": 1.15139,
+        "idx22_arm_l_joint2": -1.62672,
+        "idx23_arm_l_joint3": -0.63965,
+        "idx24_arm_l_joint4": -0.8716,
+        "idx25_arm_l_joint5": -1.94287,
+        "idx26_arm_l_joint6": -0.58311,
+        "idx27_arm_l_joint7": -0.16132,
+        "idx61_arm_r_joint1": 1.51177,
+        "idx62_arm_r_joint2": 1.59671,
+        "idx63_arm_r_joint3": -1.71512,
+        "idx64_arm_r_joint4": -1.29089,
+        "idx65_arm_r_joint5": -1.44297,
+        "idx66_arm_r_joint6": 0.32082,
+        "idx67_arm_r_joint7": -0.17964
+      }
+    },
+    {
+      "name": "SCOOP_LIFT",
+      "note": "4 lift the handful out level",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        3.5549,
+        1.5832,
+        0.9123
+      ],
+      "tcp_r_world_m": [
+        3.5573,
+        1.4637,
+        0.9124
+      ],
+      "approach_l": [
+        1.0,
+        -0.032,
+        -0.001
+      ],
+      "approach_r": [
+        0.999,
+        0.041,
+        -0.004
+      ],
+      "check": {
+        "pos_err": 0.0055,
+        "approach_err_deg": 2.3324,
+        "coupled": 0.0,
+        "tilt_deg": 7.1697,
+        "shift": 0.0795,
+        "env_clear": 0.0915,
+        "self_clear": 0.0291,
+        "hand_clear": 0.0351
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.8448,
+        "base_y": 1.524,
+        "base_yaw": 0.0,
+        "idx01_body_joint1": -0.35741,
+        "idx02_body_joint2": 0.91272,
+        "idx03_body_joint3": -0.53563,
+        "idx04_body_joint4": -0.12358,
+        "idx05_body_joint5": 0.21873,
+        "idx21_arm_l_joint1": 1.23168,
+        "idx22_arm_l_joint2": -1.65736,
+        "idx23_arm_l_joint3": -0.65601,
+        "idx24_arm_l_joint4": -0.97924,
+        "idx25_arm_l_joint5": -1.8514,
+        "idx26_arm_l_joint6": -0.58917,
+        "idx27_arm_l_joint7": -0.30065,
+        "idx61_arm_r_joint1": 1.47845,
+        "idx62_arm_r_joint2": 1.6809,
+        "idx63_arm_r_joint3": -1.7607,
+        "idx64_arm_r_joint4": -1.34847,
+        "idx65_arm_r_joint5": -1.46445,
+        "idx66_arm_r_joint6": 0.34026,
+        "idx67_arm_r_joint7": -0.37566
+      }
+    },
+    {
+      "name": "CARRY~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        3.4968,
+        1.5994,
+        0.9586
+      ],
+      "tcp_r_world_m": [
+        3.4978,
+        1.4257,
+        0.9482
+      ],
+      "approach_l": [
+        0.999,
+        -0.017,
+        0.044
+      ],
+      "approach_r": [
+        1.0,
+        0.004,
+        0.027
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 5.5593,
+        "shift": 0.0268,
+        "env_clear": 0.08,
+        "self_clear": 0.05,
+        "hand_clear": 0.0866
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.8448,
+        "base_y": 1.524,
+        "base_yaw": 0.0,
+        "idx01_body_joint1": -0.40706,
+        "idx02_body_joint2": 0.87127,
+        "idx03_body_joint3": -0.49491,
+        "idx04_body_joint4": -0.09206,
+        "idx05_body_joint5": 0.24583,
+        "idx21_arm_l_joint1": 1.23855,
+        "idx22_arm_l_joint2": -1.6033,
+        "idx23_arm_l_joint3": -0.62404,
+        "idx24_arm_l_joint4": -1.07327,
+        "idx25_arm_l_joint5": -1.85061,
+        "idx26_arm_l_joint6": -0.6055,
+        "idx27_arm_l_joint7": -0.24227,
+        "idx61_arm_r_joint1": 1.40129,
+        "idx62_arm_r_joint2": 1.59676,
+        "idx63_arm_r_joint3": -1.75537,
+        "idx64_arm_r_joint4": -1.45414,
+        "idx65_arm_r_joint5": -1.47965,
+        "idx66_arm_r_joint6": 0.4112,
+        "idx67_arm_r_joint7": -0.31097
+      }
+    },
+    {
+      "name": "CARRY~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        3.4241,
+        1.5984,
+        0.9699
+      ],
+      "tcp_r_world_m": [
+        3.4281,
+        1.4408,
+        0.9607
+      ],
+      "approach_l": [
+        1.0,
+        -0.006,
+        0.009
+      ],
+      "approach_r": [
+        1.0,
+        0.016,
+        0.005
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 5.1566,
+        "shift": 0.0273,
+        "env_clear": 0.082,
+        "self_clear": 0.05,
+        "hand_clear": 0.0707
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.8448,
+        "base_y": 1.524,
+        "base_yaw": 0.0,
+        "idx01_body_joint1": -0.45296,
+        "idx02_body_joint2": 0.83447,
+        "idx03_body_joint3": -0.44547,
+        "idx04_body_joint4": -0.06336,
+        "idx05_body_joint5": 0.29202,
+        "idx21_arm_l_joint1": 1.28328,
+        "idx22_arm_l_joint2": -1.57962,
+        "idx23_arm_l_joint3": -0.5774,
+        "idx24_arm_l_joint4": -1.15848,
+        "idx25_arm_l_joint5": -1.87759,
+        "idx26_arm_l_joint6": -0.61985,
+        "idx27_arm_l_joint7": -0.17644,
+        "idx61_arm_r_joint1": 1.314,
+        "idx62_arm_r_joint2": 1.58467,
+        "idx63_arm_r_joint3": -1.7924,
+        "idx64_arm_r_joint4": -1.55127,
+        "idx65_arm_r_joint5": -1.49485,
+        "idx66_arm_r_joint6": 0.48214,
+        "idx67_arm_r_joint7": -0.24628
+      }
+    },
+    {
+      "name": "CARRY",
+      "note": "both hands cupped together, level, in front of the chest",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        3.2782,
+        1.588,
+        1.0044
+      ],
+      "tcp_r_world_m": [
+        3.2725,
+        1.4603,
+        0.9993
+      ],
+      "approach_l": [
+        1.0,
+        -0.017,
+        0.001
+      ],
+      "approach_r": [
+        0.999,
+        0.035,
+        0.0
+      ],
+      "check": {
+        "pos_err": 0.0167,
+        "approach_err_deg": 2.0138,
+        "coupled": 0.0,
+        "tilt_deg": 8.4587,
+        "shift": 0.1313,
+        "env_clear": 0.1239,
+        "self_clear": 0.0261,
+        "hand_clear": 0.043
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.8448,
+        "base_y": 1.524,
+        "base_yaw": 0.0,
+        "idx01_body_joint1": -0.54851,
+        "idx02_body_joint2": 0.75622,
+        "idx03_body_joint3": -0.35531,
+        "idx04_body_joint4": -0.00314,
+        "idx05_body_joint5": 0.34253,
+        "idx21_arm_l_joint1": 1.3416,
+        "idx22_arm_l_joint2": -1.50732,
+        "idx23_arm_l_joint3": -0.49573,
+        "idx24_arm_l_joint4": -1.33732,
+        "idx25_arm_l_joint5": -1.90618,
+        "idx26_arm_l_joint6": -0.65052,
+        "idx27_arm_l_joint7": -0.05222,
+        "idx61_arm_r_joint1": 1.15324,
+        "idx62_arm_r_joint2": 1.54961,
+        "idx63_arm_r_joint3": -1.89884,
+        "idx64_arm_r_joint4": -1.75774,
+        "idx65_arm_r_joint5": -1.53197,
+        "idx66_arm_r_joint6": 0.62402,
+        "idx67_arm_r_joint7": -0.11692
+      }
+    },
+    {
+      "name": "BACK_OFF",
+      "note": "back away from the bin, holding",
+      "kind": "drive",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        3.0496,
+        1.588,
+        1.0044
+      ],
+      "tcp_r_world_m": [
+        3.0439,
+        1.4603,
+        0.9993
+      ],
+      "approach_l": [
+        1.0,
+        -0.017,
+        0.001
+      ],
+      "approach_r": [
+        0.999,
+        0.035,
+        0.0
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 8.4588,
+        "shift": 0.1313,
+        "env_clear": 0.3525,
+        "self_clear": 0.0261,
+        "hand_clear": 0.043
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "idx01_body_joint1": -0.54851,
+        "idx02_body_joint2": 0.75622,
+        "idx03_body_joint3": -0.35531,
+        "idx04_body_joint4": -0.00314,
+        "idx05_body_joint5": 0.34253,
+        "idx21_arm_l_joint1": 1.3416,
+        "idx22_arm_l_joint2": -1.50732,
+        "idx23_arm_l_joint3": -0.49573,
+        "idx24_arm_l_joint4": -1.33732,
+        "idx25_arm_l_joint5": -1.90618,
+        "idx26_arm_l_joint6": -0.65052,
+        "idx27_arm_l_joint7": -0.05222,
+        "idx61_arm_r_joint1": 1.15324,
+        "idx62_arm_r_joint2": 1.54961,
+        "idx63_arm_r_joint3": -1.89884,
+        "idx64_arm_r_joint4": -1.75774,
+        "idx65_arm_r_joint5": -1.53197,
+        "idx66_arm_r_joint6": 0.62402,
+        "idx67_arm_r_joint7": -0.11692,
+        "base_x": 2.6162,
+        "base_y": 1.524,
+        "base_yaw": 0.0
+      },
+      "relative_move": {
+        "dx_m": -0.2286,
+        "dy_m": 0.0,
+        "dyaw_rad": 0.0
+      },
+      "leg_check": {
+        "closest": "base_link<->bin_wall_w[drive]",
+        "min_env_clearance_m": 0.1239,
+        "min_self_clearance_m": 0.0261,
+        "min_hand_gap_m": 0.043,
+        "max_coupled_violation": 0.0,
+        "max_torso_tilt_deg": 8.46,
+        "max_waist_shift_m": 0.1313
+      }
+    },
+    {
+      "name": "TURN_LEFT",
+      "note": "turn in place to face the hopper row, holding",
+      "kind": "drive",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.5522,
+        1.9574,
+        1.0044
+      ],
+      "tcp_r_world_m": [
+        2.6799,
+        1.9517,
+        0.9993
+      ],
+      "approach_l": [
+        0.017,
+        1.0,
+        0.001
+      ],
+      "approach_r": [
+        -0.035,
+        0.999,
+        0.0
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 8.4588,
+        "shift": 0.1313,
+        "env_clear": 0.4186,
+        "self_clear": 0.0261,
+        "hand_clear": 0.043
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "idx01_body_joint1": -0.54851,
+        "idx02_body_joint2": 0.75622,
+        "idx03_body_joint3": -0.35531,
+        "idx04_body_joint4": -0.00314,
+        "idx05_body_joint5": 0.34253,
+        "idx21_arm_l_joint1": 1.3416,
+        "idx22_arm_l_joint2": -1.50732,
+        "idx23_arm_l_joint3": -0.49573,
+        "idx24_arm_l_joint4": -1.33732,
+        "idx25_arm_l_joint5": -1.90618,
+        "idx26_arm_l_joint6": -0.65052,
+        "idx27_arm_l_joint7": -0.05222,
+        "idx61_arm_r_joint1": 1.15324,
+        "idx62_arm_r_joint2": 1.54961,
+        "idx63_arm_r_joint3": -1.89884,
+        "idx64_arm_r_joint4": -1.75774,
+        "idx65_arm_r_joint5": -1.53197,
+        "idx66_arm_r_joint6": 0.62402,
+        "idx67_arm_r_joint7": -0.11692,
+        "base_x": 2.6162,
+        "base_y": 1.524,
+        "base_yaw": 1.5708
+      },
+      "relative_move": {
+        "dx_m": 0.0,
+        "dy_m": 0.0,
+        "dyaw_rad": 1.5708
+      },
+      "leg_check": {
+        "closest": "base_link<->bin_wall_w[drive]",
+        "min_env_clearance_m": 0.2822,
+        "min_self_clearance_m": 0.0261,
+        "min_hand_gap_m": 0.043,
+        "max_coupled_violation": 0.0,
+        "max_torso_tilt_deg": 8.46,
+        "max_waist_shift_m": 0.1313
+      }
+    },
+    {
+      "name": "DRIVE_NORTH",
+      "note": "drive forward, holding",
+      "kind": "drive",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.5522,
+        3.1131,
+        1.0044
+      ],
+      "tcp_r_world_m": [
+        2.6799,
+        3.1074,
+        0.9993
+      ],
+      "approach_l": [
+        0.017,
+        1.0,
+        0.001
+      ],
+      "approach_r": [
+        -0.035,
+        0.999,
+        0.0
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 8.4588,
+        "shift": 0.1313,
+        "env_clear": 0.4422,
+        "self_clear": 0.0261,
+        "hand_clear": 0.043
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "idx01_body_joint1": -0.54851,
+        "idx02_body_joint2": 0.75622,
+        "idx03_body_joint3": -0.35531,
+        "idx04_body_joint4": -0.00314,
+        "idx05_body_joint5": 0.34253,
+        "idx21_arm_l_joint1": 1.3416,
+        "idx22_arm_l_joint2": -1.50732,
+        "idx23_arm_l_joint3": -0.49573,
+        "idx24_arm_l_joint4": -1.33732,
+        "idx25_arm_l_joint5": -1.90618,
+        "idx26_arm_l_joint6": -0.65052,
+        "idx27_arm_l_joint7": -0.05222,
+        "idx61_arm_r_joint1": 1.15324,
+        "idx62_arm_r_joint2": 1.54961,
+        "idx63_arm_r_joint3": -1.89884,
+        "idx64_arm_r_joint4": -1.75774,
+        "idx65_arm_r_joint5": -1.53197,
+        "idx66_arm_r_joint6": 0.62402,
+        "idx67_arm_r_joint7": -0.11692,
+        "base_x": 2.6162,
+        "base_y": 2.6797,
+        "base_yaw": 1.5708
+      },
+      "relative_move": {
+        "dx_m": 1.1557,
+        "dy_m": -0.0,
+        "dyaw_rad": -0.0
+      },
+      "leg_check": {
+        "closest": "base_link<->bin_wall_w[drive]",
+        "min_env_clearance_m": 0.4186,
+        "min_self_clearance_m": 0.0261,
+        "min_hand_gap_m": 0.043,
+        "max_coupled_violation": 0.0,
+        "max_torso_tilt_deg": 8.46,
+        "max_waist_shift_m": 0.1313
+      }
+    },
+    {
+      "name": "TURN_TO_HOPPER",
+      "note": "turn in place to face the hopper, holding",
+      "kind": "drive",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.1828,
+        2.6157,
+        1.0044
+      ],
+      "tcp_r_world_m": [
+        2.1885,
+        2.7434,
+        0.9993
+      ],
+      "approach_l": [
+        -1.0,
+        0.017,
+        0.001
+      ],
+      "approach_r": [
+        -0.999,
+        -0.035,
+        0.0
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 8.4588,
+        "shift": 0.1313,
+        "env_clear": 0.3958,
+        "self_clear": 0.0261,
+        "hand_clear": 0.043
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "idx01_body_joint1": -0.54851,
+        "idx02_body_joint2": 0.75622,
+        "idx03_body_joint3": -0.35531,
+        "idx04_body_joint4": -0.00314,
+        "idx05_body_joint5": 0.34253,
+        "idx21_arm_l_joint1": 1.3416,
+        "idx22_arm_l_joint2": -1.50732,
+        "idx23_arm_l_joint3": -0.49573,
+        "idx24_arm_l_joint4": -1.33732,
+        "idx25_arm_l_joint5": -1.90618,
+        "idx26_arm_l_joint6": -0.65052,
+        "idx27_arm_l_joint7": -0.05222,
+        "idx61_arm_r_joint1": 1.15324,
+        "idx62_arm_r_joint2": 1.54961,
+        "idx63_arm_r_joint3": -1.89884,
+        "idx64_arm_r_joint4": -1.75774,
+        "idx65_arm_r_joint5": -1.53197,
+        "idx66_arm_r_joint6": 0.62402,
+        "idx67_arm_r_joint7": -0.11692,
+        "base_x": 2.6162,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159
+      },
+      "relative_move": {
+        "dx_m": 0.0,
+        "dy_m": -0.0,
+        "dyaw_rad": 1.5708
+      },
+      "leg_check": {
+        "closest": "base_link<->hopper_base[drive]",
+        "min_env_clearance_m": 0.3767,
+        "min_self_clearance_m": 0.0261,
+        "min_hand_gap_m": 0.043,
+        "max_coupled_violation": 0.0,
+        "max_torso_tilt_deg": 8.46,
+        "max_waist_shift_m": 0.1313
+      }
+    },
+    {
+      "name": "RAISE~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.1049,
+        2.5624,
+        1.1713
+      ],
+      "tcp_r_world_m": [
+        2.1142,
+        2.6944,
+        1.1069
+      ],
+      "approach_l": [
+        -0.995,
+        -0.049,
+        0.089
+      ],
+      "approach_r": [
+        -0.985,
+        -0.167,
+        -0.044
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 8.2124,
+        "shift": 0.127,
+        "env_clear": 0.3257,
+        "self_clear": 0.05,
+        "hand_clear": 0.0407
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.6162,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.49729,
+        "idx02_body_joint2": 0.6719,
+        "idx03_body_joint3": -0.31789,
+        "idx04_body_joint4": 0.00393,
+        "idx05_body_joint5": 0.3929,
+        "idx21_arm_l_joint1": 0.99643,
+        "idx22_arm_l_joint2": -1.53826,
+        "idx23_arm_l_joint3": -0.52175,
+        "idx24_arm_l_joint4": -1.37926,
+        "idx25_arm_l_joint5": -2.03292,
+        "idx26_arm_l_joint6": -0.66683,
+        "idx27_arm_l_joint7": 0.14795,
+        "idx61_arm_r_joint1": 1.37526,
+        "idx62_arm_r_joint2": 1.56663,
+        "idx63_arm_r_joint3": -1.81423,
+        "idx64_arm_r_joint4": -1.90528,
+        "idx65_arm_r_joint5": -1.71862,
+        "idx66_arm_r_joint6": 0.44017,
+        "idx67_arm_r_joint7": 0.36053
+      }
+    },
+    {
+      "name": "RAISE~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.0949,
+        2.5512,
+        1.3522
+      ],
+      "tcp_r_world_m": [
+        2.087,
+        2.6777,
+        1.2272
+      ],
+      "approach_l": [
+        -0.985,
+        -0.035,
+        0.17
+      ],
+      "approach_r": [
+        -0.979,
+        -0.184,
+        -0.091
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 8.5886,
+        "shift": 0.127,
+        "env_clear": 0.3,
+        "self_clear": 0.05,
+        "hand_clear": 0.0246
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.6162,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.44758,
+        "idx02_body_joint2": 0.58217,
+        "idx03_body_joint3": -0.28406,
+        "idx04_body_joint4": 0.01142,
+        "idx05_body_joint5": 0.44327,
+        "idx21_arm_l_joint1": 0.66396,
+        "idx22_arm_l_joint2": -1.58283,
+        "idx23_arm_l_joint3": -0.54045,
+        "idx24_arm_l_joint4": -1.42915,
+        "idx25_arm_l_joint5": -2.17429,
+        "idx26_arm_l_joint6": -0.68829,
+        "idx27_arm_l_joint7": 0.34555,
+        "idx61_arm_r_joint1": 1.61111,
+        "idx62_arm_r_joint2": 1.59607,
+        "idx63_arm_r_joint3": -1.7466,
+        "idx64_arm_r_joint4": -2.05114,
+        "idx65_arm_r_joint5": -1.91764,
+        "idx66_arm_r_joint6": 0.25457,
+        "idx67_arm_r_joint7": 0.83758
+      }
+    },
+    {
+      "name": "RAISE~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.1223,
+        2.5595,
+        1.4668
+      ],
+      "tcp_r_world_m": [
+        2.0994,
+        2.7037,
+        1.4072
+      ],
+      "approach_l": [
+        -0.994,
+        -0.019,
+        0.105
+      ],
+      "approach_r": [
+        -0.995,
+        -0.077,
+        0.063
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 8.9684,
+        "shift": 0.127,
+        "env_clear": 0.339,
+        "self_clear": 0.05,
+        "hand_clear": 0.0359
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.6162,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.39906,
+        "idx02_body_joint2": 0.49386,
+        "idx03_body_joint3": -0.25022,
+        "idx04_body_joint4": 0.01865,
+        "idx05_body_joint5": 0.49364,
+        "idx21_arm_l_joint1": 0.38476,
+        "idx22_arm_l_joint2": -1.63278,
+        "idx23_arm_l_joint3": -0.56091,
+        "idx24_arm_l_joint4": -1.45417,
+        "idx25_arm_l_joint5": -2.24093,
+        "idx26_arm_l_joint6": -0.72254,
+        "idx27_arm_l_joint7": 0.66088,
+        "idx61_arm_r_joint1": 1.92886,
+        "idx62_arm_r_joint2": 1.62248,
+        "idx63_arm_r_joint3": -1.69932,
+        "idx64_arm_r_joint4": -2.1977,
+        "idx65_arm_r_joint5": -2.13651,
+        "idx66_arm_r_joint6": 0.09827,
+        "idx67_arm_r_joint7": 1.1694
+      }
+    },
+    {
+      "name": "RAISE~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.1467,
+        2.5719,
+        1.5097
+      ],
+      "tcp_r_world_m": [
+        2.1298,
+        2.7337,
+        1.4932
+      ],
+      "approach_l": [
+        -0.998,
+        -0.006,
+        0.057
+      ],
+      "approach_r": [
+        -0.99,
+        0.008,
+        0.141
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 9.1739,
+        "shift": 0.127,
+        "env_clear": 0.403,
+        "self_clear": 0.05,
+        "hand_clear": 0.0652
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.6162,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.37491,
+        "idx02_body_joint2": 0.4497,
+        "idx03_body_joint3": -0.23336,
+        "idx04_body_joint4": 0.02229,
+        "idx05_body_joint5": 0.51882,
+        "idx21_arm_l_joint1": 0.25698,
+        "idx22_arm_l_joint2": -1.65819,
+        "idx23_arm_l_joint3": -0.57087,
+        "idx24_arm_l_joint4": -1.4671,
+        "idx25_arm_l_joint5": -2.27453,
+        "idx26_arm_l_joint6": -0.74028,
+        "idx27_arm_l_joint7": 0.81811,
+        "idx61_arm_r_joint1": 2.11821,
+        "idx62_arm_r_joint2": 1.64117,
+        "idx63_arm_r_joint3": -1.68362,
+        "idx64_arm_r_joint4": -2.27081,
+        "idx65_arm_r_joint5": -2.24751,
+        "idx66_arm_r_joint6": 0.02019,
+        "idx67_arm_r_joint7": 1.33619
+      }
+    },
+    {
+      "name": "RAISE",
+      "note": "raise the cupped hands above the 50 in rim, below the frame",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.1934,
+        2.6188,
+        1.5494
+      ],
+      "tcp_r_world_m": [
+        2.1836,
+        2.7367,
+        1.5359
+      ],
+      "approach_l": [
+        -0.998,
+        0.058,
+        0.01
+      ],
+      "approach_r": [
+        -0.995,
+        -0.004,
+        0.101
+      ],
+      "check": {
+        "pos_err": 0.019,
+        "approach_err_deg": 5.7921,
+        "coupled": 0.0003,
+        "tilt_deg": 9.7783,
+        "shift": 0.1303,
+        "env_clear": 0.4499,
+        "self_clear": 0.0265,
+        "hand_clear": 0.0338
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.6162,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.35187,
+        "idx02_body_joint2": 0.40143,
+        "idx03_body_joint3": -0.21824,
+        "idx04_body_joint4": 0.02611,
+        "idx05_body_joint5": 0.54401,
+        "idx21_arm_l_joint1": 0.11926,
+        "idx22_arm_l_joint2": -1.71659,
+        "idx23_arm_l_joint3": -0.57158,
+        "idx24_arm_l_joint4": -1.49544,
+        "idx25_arm_l_joint5": -2.33068,
+        "idx26_arm_l_joint6": -0.77069,
+        "idx27_arm_l_joint7": 0.97408,
+        "idx61_arm_r_joint1": 2.27597,
+        "idx62_arm_r_joint2": 1.83715,
+        "idx63_arm_r_joint3": -1.68167,
+        "idx64_arm_r_joint4": -2.34314,
+        "idx65_arm_r_joint5": -2.37955,
+        "idx66_arm_r_joint6": -0.06361,
+        "idx67_arm_r_joint7": 1.50373
+      }
+    },
+    {
+      "name": "DOCK",
+      "note": "move up to the hopper with hands raised",
+      "kind": "drive",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        1.8378,
+        2.6188,
+        1.5494
+      ],
+      "tcp_r_world_m": [
+        1.828,
+        2.7367,
+        1.5359
+      ],
+      "approach_l": [
+        -0.998,
+        0.058,
+        0.01
+      ],
+      "approach_r": [
+        -0.995,
+        -0.004,
+        0.101
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0003,
+        "tilt_deg": 9.7787,
+        "shift": 0.1303,
+        "env_clear": 0.0985,
+        "self_clear": 0.0265,
+        "hand_clear": 0.0338
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "idx01_body_joint1": -0.35187,
+        "idx02_body_joint2": 0.40143,
+        "idx03_body_joint3": -0.21824,
+        "idx04_body_joint4": 0.02611,
+        "idx05_body_joint5": 0.54401,
+        "idx21_arm_l_joint1": 0.11926,
+        "idx22_arm_l_joint2": -1.71659,
+        "idx23_arm_l_joint3": -0.57158,
+        "idx24_arm_l_joint4": -1.49544,
+        "idx25_arm_l_joint5": -2.33068,
+        "idx26_arm_l_joint6": -0.77069,
+        "idx27_arm_l_joint7": 0.97408,
+        "idx61_arm_r_joint1": 2.27597,
+        "idx62_arm_r_joint2": 1.83715,
+        "idx63_arm_r_joint3": -1.68167,
+        "idx64_arm_r_joint4": -2.34314,
+        "idx65_arm_r_joint5": -2.37955,
+        "idx66_arm_r_joint6": -0.06361,
+        "idx67_arm_r_joint7": 1.50373,
+        "base_x": 2.2606,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159
+      },
+      "relative_move": {
+        "dx_m": 0.3556,
+        "dy_m": 0.0,
+        "dyaw_rad": 0.0
+      },
+      "leg_check": {
+        "closest": "base_link<->hopper_base[drive]",
+        "min_env_clearance_m": 0.0985,
+        "min_self_clearance_m": 0.0265,
+        "min_hand_gap_m": 0.0338,
+        "max_coupled_violation": 0.0003,
+        "max_torso_tilt_deg": 9.78,
+        "max_waist_shift_m": 0.1303
+      }
+    },
+    {
+      "name": "OVER_HOPPER~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        1.7046,
+        2.5856,
+        1.5549
+      ],
+      "tcp_r_world_m": [
+        1.7077,
+        2.7461,
+        1.5487
+      ],
+      "approach_l": [
+        -1.0,
+        -0.002,
+        0.008
+      ],
+      "approach_r": [
+        -0.998,
+        0.013,
+        0.067
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 6.9939,
+        "shift": 0.0738,
+        "env_clear": 0.0985,
+        "self_clear": 0.05,
+        "hand_clear": 0.0724
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.2606,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.31444,
+        "idx02_body_joint2": 0.46081,
+        "idx03_body_joint3": -0.26602,
+        "idx04_body_joint4": -0.02423,
+        "idx05_body_joint5": 0.4439,
+        "idx21_arm_l_joint1": 0.10112,
+        "idx22_arm_l_joint2": -1.7813,
+        "idx23_arm_l_joint3": -0.65925,
+        "idx24_arm_l_joint4": -1.27189,
+        "idx25_arm_l_joint5": -2.17603,
+        "idx26_arm_l_joint6": -0.7036,
+        "idx27_arm_l_joint7": 0.9495,
+        "idx61_arm_r_joint1": 2.41532,
+        "idx62_arm_r_joint2": 1.69318,
+        "idx63_arm_r_joint3": -1.59893,
+        "idx64_arm_r_joint4": -2.17147,
+        "idx65_arm_r_joint5": -2.1378,
+        "idx66_arm_r_joint6": 0.03623,
+        "idx67_arm_r_joint7": 1.48935
+      }
+    },
+    {
+      "name": "OVER_HOPPER",
+      "note": "5 reach over the rim into the hopper",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        1.6002,
+        2.6189,
+        1.55
+      ],
+      "tcp_r_world_m": [
+        1.6002,
+        2.7405,
+        1.5499
+      ],
+      "approach_l": [
+        -0.999,
+        0.032,
+        -0.0
+      ],
+      "approach_r": [
+        -0.999,
+        -0.032,
+        0.0
+      ],
+      "check": {
+        "pos_err": 0.0058,
+        "approach_err_deg": 1.8234,
+        "coupled": 0.0,
+        "tilt_deg": 5.8815,
+        "shift": 0.0207,
+        "env_clear": 0.06,
+        "self_clear": 0.0294,
+        "hand_clear": 0.0369
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.2606,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.27701,
+        "idx02_body_joint2": 0.52019,
+        "idx03_body_joint3": -0.3138,
+        "idx04_body_joint4": -0.07457,
+        "idx05_body_joint5": 0.3438,
+        "idx21_arm_l_joint1": 0.04689,
+        "idx22_arm_l_joint2": -1.90208,
+        "idx23_arm_l_joint3": -0.7145,
+        "idx24_arm_l_joint4": -1.07988,
+        "idx25_arm_l_joint5": -2.0388,
+        "idx26_arm_l_joint6": -0.63506,
+        "idx27_arm_l_joint7": 0.93277,
+        "idx61_arm_r_joint1": 2.54634,
+        "idx62_arm_r_joint2": 1.59826,
+        "idx63_arm_r_joint3": -1.58068,
+        "idx64_arm_r_joint4": -1.99566,
+        "idx65_arm_r_joint5": -1.89492,
+        "idx66_arm_r_joint6": 0.12694,
+        "idx67_arm_r_joint7": 1.47477
+      }
+    },
+    {
+      "name": "POUR~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        1.5054,
+        2.5616,
+        1.4098
+      ],
+      "tcp_r_world_m": [
+        1.5075,
+        2.7514,
+        1.4677
+      ],
+      "approach_l": [
+        -0.849,
+        -0.048,
+        -0.526
+      ],
+      "approach_r": [
+        -0.885,
+        -0.005,
+        -0.465
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 7.7845,
+        "shift": 0.0173,
+        "env_clear": 0.0881,
+        "self_clear": 0.05,
+        "hand_clear": 0.1072
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.2606,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.22957,
+        "idx02_body_joint2": 0.46076,
+        "idx03_body_joint3": -0.3188,
+        "idx04_body_joint4": -0.10397,
+        "idx05_body_joint5": 0.13276,
+        "idx21_arm_l_joint1": -0.07813,
+        "idx22_arm_l_joint2": -1.79674,
+        "idx23_arm_l_joint3": -0.58578,
+        "idx24_arm_l_joint4": -0.56589,
+        "idx25_arm_l_joint5": -2.28993,
+        "idx26_arm_l_joint6": -0.52419,
+        "idx27_arm_l_joint7": 1.14988,
+        "idx61_arm_r_joint1": 2.79331,
+        "idx62_arm_r_joint2": 1.73686,
+        "idx63_arm_r_joint3": -1.4933,
+        "idx64_arm_r_joint4": -1.28171,
+        "idx65_arm_r_joint5": -1.7897,
+        "idx66_arm_r_joint6": 0.14224,
+        "idx67_arm_r_joint7": 1.49022
+      }
+    },
+    {
+      "name": "POUR~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        1.4965,
+        2.5555,
+        1.3584
+      ],
+      "tcp_r_world_m": [
+        1.501,
+        2.7538,
+        1.416
+      ],
+      "approach_l": [
+        -0.698,
+        -0.052,
+        -0.714
+      ],
+      "approach_r": [
+        -0.751,
+        -0.012,
+        -0.66
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 8.7415,
+        "shift": 0.0179,
+        "env_clear": 0.0985,
+        "self_clear": 0.05,
+        "hand_clear": 0.1132
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.2606,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.20585,
+        "idx02_body_joint2": 0.43104,
+        "idx03_body_joint3": -0.3213,
+        "idx04_body_joint4": -0.11867,
+        "idx05_body_joint5": 0.02724,
+        "idx21_arm_l_joint1": -0.12872,
+        "idx22_arm_l_joint2": -1.79558,
+        "idx23_arm_l_joint3": -0.50477,
+        "idx24_arm_l_joint4": -0.3089,
+        "idx25_arm_l_joint5": -2.41549,
+        "idx26_arm_l_joint6": -0.46876,
+        "idx27_arm_l_joint7": 1.25843,
+        "idx61_arm_r_joint1": 2.9168,
+        "idx62_arm_r_joint2": 1.79812,
+        "idx63_arm_r_joint3": -1.44989,
+        "idx64_arm_r_joint4": -0.92473,
+        "idx65_arm_r_joint5": -1.73709,
+        "idx66_arm_r_joint6": 0.14989,
+        "idx67_arm_r_joint7": 1.49795
+      }
+    },
+    {
+      "name": "POUR~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        1.4974,
+        2.5511,
+        1.3429
+      ],
+      "tcp_r_world_m": [
+        1.5051,
+        2.7746,
+        1.3893
+      ],
+      "approach_l": [
+        -0.617,
+        -0.041,
+        -0.786
+      ],
+      "approach_r": [
+        -0.67,
+        0.007,
+        -0.743
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 9.221,
+        "shift": 0.0187,
+        "env_clear": 0.0985,
+        "self_clear": 0.05,
+        "hand_clear": 0.1362
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.2606,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.194,
+        "idx02_body_joint2": 0.41618,
+        "idx03_body_joint3": -0.32255,
+        "idx04_body_joint4": -0.12602,
+        "idx05_body_joint5": -0.02552,
+        "idx21_arm_l_joint1": -0.15712,
+        "idx22_arm_l_joint2": -1.79375,
+        "idx23_arm_l_joint3": -0.47235,
+        "idx24_arm_l_joint4": -0.1804,
+        "idx25_arm_l_joint5": -2.47827,
+        "idx26_arm_l_joint6": -0.44104,
+        "idx27_arm_l_joint7": 1.31271,
+        "idx61_arm_r_joint1": 2.97552,
+        "idx62_arm_r_joint2": 1.79754,
+        "idx63_arm_r_joint3": -1.43167,
+        "idx64_arm_r_joint4": -0.74625,
+        "idx65_arm_r_joint5": -1.71079,
+        "idx66_arm_r_joint6": 0.15371,
+        "idx67_arm_r_joint7": 1.50181
+      }
+    },
+    {
+      "name": "POUR",
+      "note": "6 tip both hands down into the hopper: pour",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        1.524,
+        2.6189,
+        1.36
+      ],
+      "tcp_r_world_m": [
+        1.5241,
+        2.7404,
+        1.3599
+      ],
+      "approach_l": [
+        -0.573,
+        0.032,
+        -0.819
+      ],
+      "approach_r": [
+        -0.574,
+        -0.032,
+        -0.818
+      ],
+      "check": {
+        "pos_err": 0.0058,
+        "approach_err_deg": 1.8262,
+        "coupled": 0.0,
+        "tilt_deg": 9.7012,
+        "shift": 0.0199,
+        "env_clear": 0.0985,
+        "self_clear": 0.0294,
+        "hand_clear": 0.0368
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.2606,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.18214,
+        "idx02_body_joint2": 0.40132,
+        "idx03_body_joint3": -0.3238,
+        "idx04_body_joint4": -0.13337,
+        "idx05_body_joint5": -0.07828,
+        "idx21_arm_l_joint1": -0.22286,
+        "idx22_arm_l_joint2": -1.90459,
+        "idx23_arm_l_joint3": -0.4637,
+        "idx24_arm_l_joint4": -0.0519,
+        "idx25_arm_l_joint5": -2.54105,
+        "idx26_arm_l_joint6": -0.41332,
+        "idx27_arm_l_joint7": 1.36699,
+        "idx61_arm_r_joint1": 3.04028,
+        "idx62_arm_r_joint2": 1.87546,
+        "idx63_arm_r_joint3": -1.40591,
+        "idx64_arm_r_joint4": -0.56776,
+        "idx65_arm_r_joint5": -1.68448,
+        "idx66_arm_r_joint6": 0.15754,
+        "idx67_arm_r_joint7": 1.50567
+      }
+    },
+    {
+      "name": "UNPOUR~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        1.4965,
+        2.5555,
+        1.3584
+      ],
+      "tcp_r_world_m": [
+        1.501,
+        2.7538,
+        1.416
+      ],
+      "approach_l": [
+        -0.698,
+        -0.052,
+        -0.714
+      ],
+      "approach_r": [
+        -0.751,
+        -0.012,
+        -0.66
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 8.7415,
+        "shift": 0.0179,
+        "env_clear": 0.0985,
+        "self_clear": 0.05,
+        "hand_clear": 0.1132
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.2606,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.20585,
+        "idx02_body_joint2": 0.43104,
+        "idx03_body_joint3": -0.3213,
+        "idx04_body_joint4": -0.11867,
+        "idx05_body_joint5": 0.02724,
+        "idx21_arm_l_joint1": -0.12872,
+        "idx22_arm_l_joint2": -1.79558,
+        "idx23_arm_l_joint3": -0.50477,
+        "idx24_arm_l_joint4": -0.3089,
+        "idx25_arm_l_joint5": -2.41549,
+        "idx26_arm_l_joint6": -0.46876,
+        "idx27_arm_l_joint7": 1.25843,
+        "idx61_arm_r_joint1": 2.9168,
+        "idx62_arm_r_joint2": 1.79812,
+        "idx63_arm_r_joint3": -1.44989,
+        "idx64_arm_r_joint4": -0.92473,
+        "idx65_arm_r_joint5": -1.73709,
+        "idx66_arm_r_joint6": 0.14989,
+        "idx67_arm_r_joint7": 1.49795
+      }
+    },
+    {
+      "name": "UNPOUR~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        1.5054,
+        2.5616,
+        1.4098
+      ],
+      "tcp_r_world_m": [
+        1.5075,
+        2.7514,
+        1.4677
+      ],
+      "approach_l": [
+        -0.849,
+        -0.048,
+        -0.526
+      ],
+      "approach_r": [
+        -0.885,
+        -0.005,
+        -0.465
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 7.7845,
+        "shift": 0.0173,
+        "env_clear": 0.0881,
+        "self_clear": 0.05,
+        "hand_clear": 0.1072
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.2606,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.22957,
+        "idx02_body_joint2": 0.46076,
+        "idx03_body_joint3": -0.3188,
+        "idx04_body_joint4": -0.10397,
+        "idx05_body_joint5": 0.13276,
+        "idx21_arm_l_joint1": -0.07813,
+        "idx22_arm_l_joint2": -1.79674,
+        "idx23_arm_l_joint3": -0.58578,
+        "idx24_arm_l_joint4": -0.56589,
+        "idx25_arm_l_joint5": -2.28993,
+        "idx26_arm_l_joint6": -0.52419,
+        "idx27_arm_l_joint7": 1.14988,
+        "idx61_arm_r_joint1": 2.79331,
+        "idx62_arm_r_joint2": 1.73686,
+        "idx63_arm_r_joint3": -1.4933,
+        "idx64_arm_r_joint4": -1.28171,
+        "idx65_arm_r_joint5": -1.7897,
+        "idx66_arm_r_joint6": 0.14224,
+        "idx67_arm_r_joint7": 1.49022
+      }
+    },
+    {
+      "name": "UNPOUR~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        1.5423,
+        2.5699,
+        1.4759
+      ],
+      "tcp_r_world_m": [
+        1.5552,
+        2.7543,
+        1.5237
+      ],
+      "approach_l": [
+        -0.959,
+        -0.037,
+        -0.281
+      ],
+      "approach_r": [
+        -0.975,
+        0.002,
+        -0.224
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 7.3349,
+        "shift": 0.023,
+        "env_clear": 0.08,
+        "self_clear": 0.05,
+        "hand_clear": 0.1007
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.2606,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.25747,
+        "idx02_body_joint2": 0.48717,
+        "idx03_body_joint3": -0.32203,
+        "idx04_body_joint4": -0.08882,
+        "idx05_body_joint5": 0.22781,
+        "idx21_arm_l_joint1": -0.00984,
+        "idx22_arm_l_joint2": -1.80116,
+        "idx23_arm_l_joint3": -0.65033,
+        "idx24_arm_l_joint4": -0.82288,
+        "idx25_arm_l_joint5": -2.16437,
+        "idx26_arm_l_joint6": -0.57963,
+        "idx27_arm_l_joint7": 1.04133,
+        "idx61_arm_r_joint1": 2.67067,
+        "idx62_arm_r_joint2": 1.66852,
+        "idx63_arm_r_joint3": -1.53741,
+        "idx64_arm_r_joint4": -1.64032,
+        "idx65_arm_r_joint5": -1.84231,
+        "idx66_arm_r_joint6": 0.13459,
+        "idx67_arm_r_joint7": 1.4825
+      }
+    },
+    {
+      "name": "UNPOUR~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        1.5693,
+        2.5706,
+        1.5154
+      ],
+      "tcp_r_world_m": [
+        1.5881,
+        2.7547,
+        1.5439
+      ],
+      "approach_l": [
+        -0.99,
+        -0.035,
+        -0.139
+      ],
+      "approach_r": [
+        -0.995,
+        -0.002,
+        -0.102
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 7.0955,
+        "shift": 0.0265,
+        "env_clear": 0.08,
+        "self_clear": 0.05,
+        "hand_clear": 0.0974
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.2606,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.271,
+        "idx02_body_joint2": 0.50126,
+        "idx03_body_joint3": -0.32483,
+        "idx04_body_joint4": -0.08008,
+        "idx05_body_joint5": 0.2745,
+        "idx21_arm_l_joint1": 0.02288,
+        "idx22_arm_l_joint2": -1.80344,
+        "idx23_arm_l_joint3": -0.68473,
+        "idx24_arm_l_joint4": -0.95138,
+        "idx25_arm_l_joint5": -2.10159,
+        "idx26_arm_l_joint6": -0.60735,
+        "idx27_arm_l_joint7": 0.98705,
+        "idx61_arm_r_joint1": 2.6031,
+        "idx62_arm_r_joint2": 1.6348,
+        "idx63_arm_r_joint3": -1.56018,
+        "idx64_arm_r_joint4": -1.82027,
+        "idx65_arm_r_joint5": -1.86861,
+        "idx66_arm_r_joint6": 0.13076,
+        "idx67_arm_r_joint7": 1.47863
+      }
+    },
+    {
+      "name": "UNPOUR",
+      "note": "level the hands again",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        1.6002,
+        2.6189,
+        1.5501
+      ],
+      "tcp_r_world_m": [
+        1.6002,
+        2.7405,
+        1.5499
+      ],
+      "approach_l": [
+        -0.999,
+        0.032,
+        -0.0
+      ],
+      "approach_r": [
+        -0.999,
+        -0.032,
+        0.0
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 5.8819,
+        "shift": 0.0207,
+        "env_clear": 0.06,
+        "self_clear": 0.0294,
+        "hand_clear": 0.0369
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.2606,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.27701,
+        "idx02_body_joint2": 0.52019,
+        "idx03_body_joint3": -0.3138,
+        "idx04_body_joint4": -0.07457,
+        "idx05_body_joint5": 0.3438,
+        "idx21_arm_l_joint1": 0.04689,
+        "idx22_arm_l_joint2": -1.90208,
+        "idx23_arm_l_joint3": -0.7145,
+        "idx24_arm_l_joint4": -1.07988,
+        "idx25_arm_l_joint5": -2.0388,
+        "idx26_arm_l_joint6": -0.63506,
+        "idx27_arm_l_joint7": 0.93277,
+        "idx61_arm_r_joint1": 2.54634,
+        "idx62_arm_r_joint2": 1.59826,
+        "idx63_arm_r_joint3": -1.58068,
+        "idx64_arm_r_joint4": -1.99566,
+        "idx65_arm_r_joint5": -1.89492,
+        "idx66_arm_r_joint6": 0.12694,
+        "idx67_arm_r_joint7": 1.47477
+      }
+    },
+    {
+      "name": "RETRACT",
+      "note": "pull the hands back over the rim",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        1.8321,
+        2.6186,
+        1.5505
+      ],
+      "tcp_r_world_m": [
+        1.8219,
+        2.7363,
+        1.5446
+      ],
+      "approach_l": [
+        -0.998,
+        0.065,
+        0.018
+      ],
+      "approach_r": [
+        -0.996,
+        -0.002,
+        0.09
+      ],
+      "check": {
+        "pos_err": 0.0195,
+        "approach_err_deg": 5.1531,
+        "coupled": 0.0004,
+        "tilt_deg": 9.8146,
+        "shift": 0.1336,
+        "env_clear": 0.0985,
+        "self_clear": 0.0264,
+        "hand_clear": 0.0342
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.2606,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.44367,
+        "idx02_body_joint2": 0.56433,
+        "idx03_body_joint3": -0.28718,
+        "idx04_body_joint4": 0.04037,
+        "idx05_body_joint5": 0.47854,
+        "idx21_arm_l_joint1": 0.18706,
+        "idx22_arm_l_joint2": -1.71563,
+        "idx23_arm_l_joint3": -0.69953,
+        "idx24_arm_l_joint4": -1.49703,
+        "idx25_arm_l_joint5": -2.16917,
+        "idx26_arm_l_joint6": -0.68738,
+        "idx27_arm_l_joint7": 1.06596,
+        "idx61_arm_r_joint1": 2.39389,
+        "idx62_arm_r_joint2": 1.87622,
+        "idx63_arm_r_joint3": -1.68985,
+        "idx64_arm_r_joint4": -2.19333,
+        "idx65_arm_r_joint5": -2.36617,
+        "idx66_arm_r_joint6": -0.05293,
+        "idx67_arm_r_joint7": 1.50253
+      }
+    },
+    {
+      "name": "UNDOCK",
+      "note": "back off from the hopper",
+      "kind": "drive",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.1877,
+        2.6186,
+        1.5505
+      ],
+      "tcp_r_world_m": [
+        2.1775,
+        2.7363,
+        1.5446
+      ],
+      "approach_l": [
+        -0.998,
+        0.065,
+        0.018
+      ],
+      "approach_r": [
+        -0.996,
+        -0.002,
+        0.09
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0004,
+        "tilt_deg": 9.8147,
+        "shift": 0.1336,
+        "env_clear": 0.4499,
+        "self_clear": 0.0264,
+        "hand_clear": 0.0342
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "idx01_body_joint1": -0.44367,
+        "idx02_body_joint2": 0.56433,
+        "idx03_body_joint3": -0.28718,
+        "idx04_body_joint4": 0.04037,
+        "idx05_body_joint5": 0.47854,
+        "idx21_arm_l_joint1": 0.18706,
+        "idx22_arm_l_joint2": -1.71563,
+        "idx23_arm_l_joint3": -0.69953,
+        "idx24_arm_l_joint4": -1.49703,
+        "idx25_arm_l_joint5": -2.16917,
+        "idx26_arm_l_joint6": -0.68738,
+        "idx27_arm_l_joint7": 1.06596,
+        "idx61_arm_r_joint1": 2.39389,
+        "idx62_arm_r_joint2": 1.87622,
+        "idx63_arm_r_joint3": -1.68985,
+        "idx64_arm_r_joint4": -2.19333,
+        "idx65_arm_r_joint5": -2.36617,
+        "idx66_arm_r_joint6": -0.05293,
+        "idx67_arm_r_joint7": 1.50253,
+        "base_x": 2.6162,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159
+      },
+      "relative_move": {
+        "dx_m": -0.3556,
+        "dy_m": -0.0,
+        "dyaw_rad": 0.0
+      },
+      "leg_check": {
+        "closest": "base_link<->hopper_base[drive]",
+        "min_env_clearance_m": 0.0985,
+        "min_self_clearance_m": 0.0264,
+        "min_hand_gap_m": 0.0342,
+        "max_coupled_violation": 0.0004,
+        "max_torso_tilt_deg": 9.81,
+        "max_waist_shift_m": 0.1336
+      }
+    },
+    {
+      "name": "LOWER~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.1498,
+        2.5875,
+        1.5092
+      ],
+      "tcp_r_world_m": [
+        2.1477,
+        2.7586,
+        1.5365
+      ],
+      "approach_l": [
+        -1.0,
+        0.019,
+        -0.005
+      ],
+      "approach_r": [
+        -0.983,
+        0.076,
+        0.17
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 8.6113,
+        "shift": 0.127,
+        "env_clear": 0.4317,
+        "self_clear": 0.05,
+        "hand_clear": 0.0814
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.6162,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.46486,
+        "idx02_body_joint2": 0.61258,
+        "idx03_body_joint3": -0.29186,
+        "idx04_body_joint4": 0.04271,
+        "idx05_body_joint5": 0.4713,
+        "idx21_arm_l_joint1": 0.269,
+        "idx22_arm_l_joint2": -1.66928,
+        "idx23_arm_l_joint3": -0.69948,
+        "idx24_arm_l_joint4": -1.50103,
+        "idx25_arm_l_joint5": -2.15,
+        "idx26_arm_l_joint6": -0.68732,
+        "idx27_arm_l_joint7": 1.0067,
+        "idx61_arm_r_joint1": 2.35222,
+        "idx62_arm_r_joint2": 1.70199,
+        "idx63_arm_r_joint3": -1.73149,
+        "idx64_arm_r_joint4": -2.19147,
+        "idx65_arm_r_joint5": -2.3301,
+        "idx66_arm_r_joint6": 0.01039,
+        "idx67_arm_r_joint7": 1.43854
+      }
+    },
+    {
+      "name": "LOWER~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.1368,
+        2.5825,
+        1.4772
+      ],
+      "tcp_r_world_m": [
+        2.1357,
+        2.7507,
+        1.5103
+      ],
+      "approach_l": [
+        -1.0,
+        0.008,
+        -0.001
+      ],
+      "approach_r": [
+        -0.983,
+        0.056,
+        0.174
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 8.2989,
+        "shift": 0.127,
+        "env_clear": 0.4054,
+        "self_clear": 0.05,
+        "hand_clear": 0.0794
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.6162,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.48792,
+        "idx02_body_joint2": 0.65262,
+        "idx03_body_joint3": -0.30186,
+        "idx04_body_joint4": 0.04669,
+        "idx05_body_joint5": 0.46407,
+        "idx21_arm_l_joint1": 0.34088,
+        "idx22_arm_l_joint2": -1.64998,
+        "idx23_arm_l_joint3": -0.68594,
+        "idx24_arm_l_joint4": -1.51718,
+        "idx25_arm_l_joint5": -2.13051,
+        "idx26_arm_l_joint6": -0.68814,
+        "idx27_arm_l_joint7": 0.94747,
+        "idx61_arm_r_joint1": 2.28025,
+        "idx62_arm_r_joint2": 1.68468,
+        "idx63_arm_r_joint3": -1.74993,
+        "idx64_arm_r_joint4": -2.18796,
+        "idx65_arm_r_joint5": -2.30187,
+        "idx66_arm_r_joint6": 0.0728,
+        "idx67_arm_r_joint7": 1.37474
+      }
+    },
+    {
+      "name": "LOWER~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.1167,
+        2.5728,
+        1.4072
+      ],
+      "tcp_r_world_m": [
+        2.1155,
+        2.7399,
+        1.4481
+      ],
+      "approach_l": [
+        -1.0,
+        -0.011,
+        -0.004
+      ],
+      "approach_r": [
+        -0.986,
+        0.034,
+        0.165
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 7.551,
+        "shift": 0.127,
+        "env_clear": 0.3607,
+        "self_clear": 0.05,
+        "hand_clear": 0.0791
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.6162,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.5365,
+        "idx02_body_joint2": 0.73561,
+        "idx03_body_joint3": -0.31977,
+        "idx04_body_joint4": 0.05313,
+        "idx05_body_joint5": 0.44961,
+        "idx21_arm_l_joint1": 0.48043,
+        "idx22_arm_l_joint2": -1.60533,
+        "idx23_arm_l_joint3": -0.65959,
+        "idx24_arm_l_joint4": -1.55099,
+        "idx25_arm_l_joint5": -2.10563,
+        "idx26_arm_l_joint6": -0.6973,
+        "idx27_arm_l_joint7": 0.83079,
+        "idx61_arm_r_joint1": 2.13261,
+        "idx62_arm_r_joint2": 1.65499,
+        "idx63_arm_r_joint3": -1.78756,
+        "idx64_arm_r_joint4": -2.18105,
+        "idx65_arm_r_joint5": -2.26207,
+        "idx66_arm_r_joint6": 0.19372,
+        "idx67_arm_r_joint7": 1.25229
+      }
+    },
+    {
+      "name": "LOWER~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.1058,
+        2.5632,
+        1.3324
+      ],
+      "tcp_r_world_m": [
+        2.1055,
+        2.73,
+        1.3839
+      ],
+      "approach_l": [
+        -0.999,
+        -0.034,
+        -0.009
+      ],
+      "approach_r": [
+        -0.986,
+        0.011,
+        0.165
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 6.9448,
+        "shift": 0.127,
+        "env_clear": 0.3321,
+        "self_clear": 0.0501,
+        "hand_clear": 0.0807
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.6162,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.5854,
+        "idx02_body_joint2": 0.81872,
+        "idx03_body_joint3": -0.33865,
+        "idx04_body_joint4": 0.0601,
+        "idx05_body_joint5": 0.43515,
+        "idx21_arm_l_joint1": 0.62391,
+        "idx22_arm_l_joint2": -1.55726,
+        "idx23_arm_l_joint3": -0.63662,
+        "idx24_arm_l_joint4": -1.58201,
+        "idx25_arm_l_joint5": -2.0746,
+        "idx26_arm_l_joint6": -0.70195,
+        "idx27_arm_l_joint7": 0.71321,
+        "idx61_arm_r_joint1": 1.9907,
+        "idx62_arm_r_joint2": 1.60573,
+        "idx63_arm_r_joint3": -1.84193,
+        "idx64_arm_r_joint4": -2.17453,
+        "idx65_arm_r_joint5": -2.21489,
+        "idx66_arm_r_joint6": 0.31601,
+        "idx67_arm_r_joint7": 1.12706
+      }
+    },
+    {
+      "name": "LOWER~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.1056,
+        2.5583,
+        1.2554
+      ],
+      "tcp_r_world_m": [
+        2.1037,
+        2.7248,
+        1.3138
+      ],
+      "approach_l": [
+        -0.999,
+        -0.05,
+        -0.016
+      ],
+      "approach_r": [
+        -0.988,
+        -0.005,
+        0.154
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 6.4611,
+        "shift": 0.127,
+        "env_clear": 0.3195,
+        "self_clear": 0.05,
+        "hand_clear": 0.0826
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.6162,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.63452,
+        "idx02_body_joint2": 0.90153,
+        "idx03_body_joint3": -0.35768,
+        "idx04_body_joint4": 0.06713,
+        "idx05_body_joint5": 0.42069,
+        "idx21_arm_l_joint1": 0.7674,
+        "idx22_arm_l_joint2": -1.50918,
+        "idx23_arm_l_joint3": -0.61365,
+        "idx24_arm_l_joint4": -1.61303,
+        "idx25_arm_l_joint5": -2.04357,
+        "idx26_arm_l_joint6": -0.70661,
+        "idx27_arm_l_joint7": 0.59563,
+        "idx61_arm_r_joint1": 1.84879,
+        "idx62_arm_r_joint2": 1.55646,
+        "idx63_arm_r_joint3": -1.89629,
+        "idx64_arm_r_joint4": -2.16802,
+        "idx65_arm_r_joint5": -2.16771,
+        "idx66_arm_r_joint6": 0.43831,
+        "idx67_arm_r_joint7": 1.00183
+      }
+    },
+    {
+      "name": "LOWER~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.1141,
+        2.5599,
+        1.1857
+      ],
+      "tcp_r_world_m": [
+        2.1091,
+        2.7246,
+        1.2343
+      ],
+      "approach_l": [
+        -0.998,
+        -0.054,
+        -0.012
+      ],
+      "approach_r": [
+        -0.991,
+        -0.018,
+        0.129
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 6.0513,
+        "shift": 0.126,
+        "env_clear": 0.3217,
+        "self_clear": 0.05,
+        "hand_clear": 0.0788
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.6162,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.68286,
+        "idx02_body_joint2": 0.98424,
+        "idx03_body_joint3": -0.37658,
+        "idx04_body_joint4": 0.07424,
+        "idx05_body_joint5": 0.40623,
+        "idx21_arm_l_joint1": 0.89753,
+        "idx22_arm_l_joint2": -1.46207,
+        "idx23_arm_l_joint3": -0.58736,
+        "idx24_arm_l_joint4": -1.64641,
+        "idx25_arm_l_joint5": -2.01054,
+        "idx26_arm_l_joint6": -0.71096,
+        "idx27_arm_l_joint7": 0.4789,
+        "idx61_arm_r_joint1": 1.70101,
+        "idx62_arm_r_joint2": 1.4831,
+        "idx63_arm_r_joint3": -1.95661,
+        "idx64_arm_r_joint4": -2.16121,
+        "idx65_arm_r_joint5": -2.10981,
+        "idx66_arm_r_joint6": 0.56391,
+        "idx67_arm_r_joint7": 0.87552
+      }
+    },
+    {
+      "name": "LOWER~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.1316,
+        2.5675,
+        1.1177
+      ],
+      "tcp_r_world_m": [
+        2.1254,
+        2.7288,
+        1.1519
+      ],
+      "approach_l": [
+        -0.999,
+        -0.046,
+        -0.01
+      ],
+      "approach_r": [
+        -0.996,
+        -0.025,
+        0.091
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 5.7794,
+        "shift": 0.1246,
+        "env_clear": 0.3379,
+        "self_clear": 0.05,
+        "hand_clear": 0.0738
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.6162,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.7312,
+        "idx02_body_joint2": 1.06695,
+        "idx03_body_joint3": -0.39547,
+        "idx04_body_joint4": 0.08134,
+        "idx05_body_joint5": 0.39177,
+        "idx21_arm_l_joint1": 1.0289,
+        "idx22_arm_l_joint2": -1.41713,
+        "idx23_arm_l_joint3": -0.55965,
+        "idx24_arm_l_joint4": -1.68132,
+        "idx25_arm_l_joint5": -1.97705,
+        "idx26_arm_l_joint6": -0.71515,
+        "idx27_arm_l_joint7": 0.36211,
+        "idx61_arm_r_joint1": 1.5546,
+        "idx62_arm_r_joint2": 1.41173,
+        "idx63_arm_r_joint3": -2.01983,
+        "idx64_arm_r_joint4": -2.15421,
+        "idx65_arm_r_joint5": -2.05176,
+        "idx66_arm_r_joint6": 0.68942,
+        "idx67_arm_r_joint7": 0.7492
+      }
+    },
+    {
+      "name": "LOWER~via",
+      "note": "auto via-point (collision-free)",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.1566,
+        2.5816,
+        1.057
+      ],
+      "tcp_r_world_m": [
+        2.1531,
+        2.7403,
+        1.0695
+      ],
+      "approach_l": [
+        -1.0,
+        -0.025,
+        -0.003
+      ],
+      "approach_r": [
+        -0.999,
+        -0.017,
+        0.042
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 5.6648,
+        "shift": 0.1229,
+        "env_clear": 0.3659,
+        "self_clear": 0.05,
+        "hand_clear": 0.0704
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.6162,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.77954,
+        "idx02_body_joint2": 1.14965,
+        "idx03_body_joint3": -0.41436,
+        "idx04_body_joint4": 0.08844,
+        "idx05_body_joint5": 0.37731,
+        "idx21_arm_l_joint1": 1.15855,
+        "idx22_arm_l_joint2": -1.37937,
+        "idx23_arm_l_joint3": -0.53322,
+        "idx24_arm_l_joint4": -1.71779,
+        "idx25_arm_l_joint5": -1.94444,
+        "idx26_arm_l_joint6": -0.71915,
+        "idx27_arm_l_joint7": 0.24358,
+        "idx61_arm_r_joint1": 1.40654,
+        "idx62_arm_r_joint2": 1.34227,
+        "idx63_arm_r_joint3": -2.08518,
+        "idx64_arm_r_joint4": -2.14717,
+        "idx65_arm_r_joint5": -2.00166,
+        "idx66_arm_r_joint6": 0.82013,
+        "idx67_arm_r_joint7": 0.62301
+      }
+    },
+    {
+      "name": "LOWER",
+      "note": "lower to the carry posture",
+      "kind": "arm",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.1977,
+        2.6185,
+        1.0007
+      ],
+      "tcp_r_world_m": [
+        2.1942,
+        2.742,
+        1.0005
+      ],
+      "approach_l": [
+        -1.0,
+        0.029,
+        -0.002
+      ],
+      "approach_r": [
+        -1.0,
+        -0.022,
+        -0.004
+      ],
+      "check": {
+        "pos_err": 0.0076,
+        "approach_err_deg": 1.6467,
+        "coupled": 0.0,
+        "tilt_deg": 5.7166,
+        "shift": 0.1207,
+        "env_clear": 0.407,
+        "self_clear": 0.0283,
+        "hand_clear": 0.0381
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "base_x": 2.6162,
+        "base_y": 2.6797,
+        "base_yaw": 3.14159,
+        "idx01_body_joint1": -0.82788,
+        "idx02_body_joint2": 1.23236,
+        "idx03_body_joint3": -0.43325,
+        "idx04_body_joint4": 0.09555,
+        "idx05_body_joint5": 0.36285,
+        "idx21_arm_l_joint1": 1.31469,
+        "idx22_arm_l_joint2": -1.36424,
+        "idx23_arm_l_joint3": -0.49108,
+        "idx24_arm_l_joint4": -1.77168,
+        "idx25_arm_l_joint5": -1.90528,
+        "idx26_arm_l_joint6": -0.72147,
+        "idx27_arm_l_joint7": 0.12356,
+        "idx61_arm_r_joint1": 1.28656,
+        "idx62_arm_r_joint2": 1.29463,
+        "idx63_arm_r_joint3": -2.1835,
+        "idx64_arm_r_joint4": -2.13813,
+        "idx65_arm_r_joint5": -1.95729,
+        "idx66_arm_r_joint6": 0.94982,
+        "idx67_arm_r_joint7": 0.49682
+      }
+    },
+    {
+      "name": "TURN_HOME",
+      "note": "turn in place to face south",
+      "kind": "drive",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.6774,
+        2.2612,
+        1.0007
+      ],
+      "tcp_r_world_m": [
+        2.5539,
+        2.2577,
+        1.0005
+      ],
+      "approach_l": [
+        -0.029,
+        -1.0,
+        -0.002
+      ],
+      "approach_r": [
+        0.022,
+        -1.0,
+        -0.004
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 5.7167,
+        "shift": 0.1207,
+        "env_clear": 0.4258,
+        "self_clear": 0.0283,
+        "hand_clear": 0.0381
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "idx01_body_joint1": -0.82788,
+        "idx02_body_joint2": 1.23236,
+        "idx03_body_joint3": -0.43325,
+        "idx04_body_joint4": 0.09555,
+        "idx05_body_joint5": 0.36285,
+        "idx21_arm_l_joint1": 1.31469,
+        "idx22_arm_l_joint2": -1.36424,
+        "idx23_arm_l_joint3": -0.49108,
+        "idx24_arm_l_joint4": -1.77168,
+        "idx25_arm_l_joint5": -1.90528,
+        "idx26_arm_l_joint6": -0.72147,
+        "idx27_arm_l_joint7": 0.12356,
+        "idx61_arm_r_joint1": 1.28656,
+        "idx62_arm_r_joint2": 1.29463,
+        "idx63_arm_r_joint3": -2.1835,
+        "idx64_arm_r_joint4": -2.13813,
+        "idx65_arm_r_joint5": -1.95729,
+        "idx66_arm_r_joint6": 0.94982,
+        "idx67_arm_r_joint7": 0.49682,
+        "base_x": 2.6162,
+        "base_y": 2.6797,
+        "base_yaw": 4.71239
+      },
+      "relative_move": {
+        "dx_m": 0.0,
+        "dy_m": -0.0,
+        "dyaw_rad": 1.5708
+      },
+      "leg_check": {
+        "closest": "base_link<->hopper_base[drive]",
+        "min_env_clearance_m": 0.3838,
+        "min_self_clearance_m": 0.0283,
+        "min_hand_gap_m": 0.0381,
+        "max_coupled_violation": 0.0,
+        "max_torso_tilt_deg": 5.72,
+        "max_waist_shift_m": 0.1207
+      }
+    },
+    {
+      "name": "DRIVE_SOUTH",
+      "note": "drive forward",
+      "kind": "drive",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.6774,
+        1.1055,
+        1.0007
+      ],
+      "tcp_r_world_m": [
+        2.5539,
+        1.102,
+        1.0005
+      ],
+      "approach_l": [
+        -0.029,
+        -1.0,
+        -0.002
+      ],
+      "approach_r": [
+        0.022,
+        -1.0,
+        -0.004
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 5.7167,
+        "shift": 0.1207,
+        "env_clear": 0.4086,
+        "self_clear": 0.0283,
+        "hand_clear": 0.0381
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "idx01_body_joint1": -0.82788,
+        "idx02_body_joint2": 1.23236,
+        "idx03_body_joint3": -0.43325,
+        "idx04_body_joint4": 0.09555,
+        "idx05_body_joint5": 0.36285,
+        "idx21_arm_l_joint1": 1.31469,
+        "idx22_arm_l_joint2": -1.36424,
+        "idx23_arm_l_joint3": -0.49108,
+        "idx24_arm_l_joint4": -1.77168,
+        "idx25_arm_l_joint5": -1.90528,
+        "idx26_arm_l_joint6": -0.72147,
+        "idx27_arm_l_joint7": 0.12356,
+        "idx61_arm_r_joint1": 1.28656,
+        "idx62_arm_r_joint2": 1.29463,
+        "idx63_arm_r_joint3": -2.1835,
+        "idx64_arm_r_joint4": -2.13813,
+        "idx65_arm_r_joint5": -1.95729,
+        "idx66_arm_r_joint6": 0.94982,
+        "idx67_arm_r_joint7": 0.49682,
+        "base_x": 2.6162,
+        "base_y": 1.524,
+        "base_yaw": 4.71239
+      },
+      "relative_move": {
+        "dx_m": 1.1557,
+        "dy_m": -0.0,
+        "dyaw_rad": -0.0
+      },
+      "leg_check": {
+        "closest": "base_link<->bin_wall_w[drive]",
+        "min_env_clearance_m": 0.4086,
+        "min_self_clearance_m": 0.0283,
+        "min_hand_gap_m": 0.0381,
+        "max_coupled_violation": 0.0,
+        "max_torso_tilt_deg": 5.72,
+        "max_waist_shift_m": 0.1207
+      }
+    },
+    {
+      "name": "TURN_WEST",
+      "note": "turn in place to face west",
+      "kind": "drive",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.1977,
+        1.4628,
+        1.0007
+      ],
+      "tcp_r_world_m": [
+        2.1942,
+        1.5863,
+        1.0005
+      ],
+      "approach_l": [
+        -1.0,
+        0.029,
+        -0.002
+      ],
+      "approach_r": [
+        -1.0,
+        -0.022,
+        -0.004
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 5.7167,
+        "shift": 0.1207,
+        "env_clear": 0.3627,
+        "self_clear": 0.0283,
+        "hand_clear": 0.0381
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "idx01_body_joint1": -0.82788,
+        "idx02_body_joint2": 1.23236,
+        "idx03_body_joint3": -0.43325,
+        "idx04_body_joint4": 0.09555,
+        "idx05_body_joint5": 0.36285,
+        "idx21_arm_l_joint1": 1.31469,
+        "idx22_arm_l_joint2": -1.36424,
+        "idx23_arm_l_joint3": -0.49108,
+        "idx24_arm_l_joint4": -1.77168,
+        "idx25_arm_l_joint5": -1.90528,
+        "idx26_arm_l_joint6": -0.72147,
+        "idx27_arm_l_joint7": 0.12356,
+        "idx61_arm_r_joint1": 1.28656,
+        "idx62_arm_r_joint2": 1.29463,
+        "idx63_arm_r_joint3": -2.1835,
+        "idx64_arm_r_joint4": -2.13813,
+        "idx65_arm_r_joint5": -1.95729,
+        "idx66_arm_r_joint6": 0.94982,
+        "idx67_arm_r_joint7": 0.49682,
+        "base_x": 2.6162,
+        "base_y": 1.524,
+        "base_yaw": 3.14159
+      },
+      "relative_move": {
+        "dx_m": 0.0,
+        "dy_m": 0.0,
+        "dyaw_rad": -1.5708
+      },
+      "leg_check": {
+        "closest": "base_link<->bin_wall_w[drive]",
+        "min_env_clearance_m": 0.2907,
+        "min_self_clearance_m": 0.0283,
+        "min_hand_gap_m": 0.0381,
+        "max_coupled_violation": 0.0,
+        "max_torso_tilt_deg": 5.72,
+        "max_waist_shift_m": 0.1207
+      }
+    },
+    {
+      "name": "DRIVE_HOME",
+      "note": "drive forward to the start",
+      "kind": "drive",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        1.7151,
+        1.4628,
+        1.0007
+      ],
+      "tcp_r_world_m": [
+        1.7116,
+        1.5863,
+        1.0005
+      ],
+      "approach_l": [
+        -1.0,
+        0.029,
+        -0.002
+      ],
+      "approach_r": [
+        -1.0,
+        -0.022,
+        -0.004
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 5.7167,
+        "shift": 0.1207,
+        "env_clear": 0.3944,
+        "self_clear": 0.0283,
+        "hand_clear": 0.0381
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "idx01_body_joint1": -0.82788,
+        "idx02_body_joint2": 1.23236,
+        "idx03_body_joint3": -0.43325,
+        "idx04_body_joint4": 0.09555,
+        "idx05_body_joint5": 0.36285,
+        "idx21_arm_l_joint1": 1.31469,
+        "idx22_arm_l_joint2": -1.36424,
+        "idx23_arm_l_joint3": -0.49108,
+        "idx24_arm_l_joint4": -1.77168,
+        "idx25_arm_l_joint5": -1.90528,
+        "idx26_arm_l_joint6": -0.72147,
+        "idx27_arm_l_joint7": 0.12356,
+        "idx61_arm_r_joint1": 1.28656,
+        "idx62_arm_r_joint2": 1.29463,
+        "idx63_arm_r_joint3": -2.1835,
+        "idx64_arm_r_joint4": -2.13813,
+        "idx65_arm_r_joint5": -1.95729,
+        "idx66_arm_r_joint6": 0.94982,
+        "idx67_arm_r_joint7": 0.49682,
+        "base_x": 2.1336,
+        "base_y": 1.524,
+        "base_yaw": 3.14159
+      },
+      "relative_move": {
+        "dx_m": 0.4826,
+        "dy_m": 0.0,
+        "dyaw_rad": 0.0
+      },
+      "leg_check": {
+        "closest": "base_link<->bin_wall_w[drive]",
+        "min_env_clearance_m": 0.3627,
+        "min_self_clearance_m": 0.0283,
+        "min_hand_gap_m": 0.0381,
+        "max_coupled_violation": 0.0,
+        "max_torso_tilt_deg": 5.72,
+        "max_waist_shift_m": 0.1207
+      }
+    },
+    {
+      "name": "TURN_FINAL",
+      "note": "turn to the start heading",
+      "kind": "drive",
+      "ok": true,
+      "gripper": 0.0,
+      "tcp_l_world_m": [
+        2.0724,
+        1.9425,
+        1.0007
+      ],
+      "tcp_r_world_m": [
+        2.1959,
+        1.946,
+        1.0005
+      ],
+      "approach_l": [
+        0.029,
+        1.0,
+        -0.002
+      ],
+      "approach_r": [
+        -0.022,
+        1.0,
+        -0.004
+      ],
+      "check": {
+        "pos_err": 0.0,
+        "approach_err_deg": 0.0,
+        "coupled": 0.0,
+        "tilt_deg": 5.7167,
+        "shift": 0.1207,
+        "env_clear": 0.3845,
+        "self_clear": 0.0283,
+        "hand_clear": 0.0381
+      },
+      "joints": {
+        "idx11_head_joint1": 0.0,
+        "idx12_head_joint2": 0.0,
+        "idx13_head_joint3": 0.0,
+        "idx31_gripper_l_inner_joint1": 0.0,
+        "idx71_gripper_r_inner_joint1": 0.0,
+        "idx01_body_joint1": -0.82788,
+        "idx02_body_joint2": 1.23236,
+        "idx03_body_joint3": -0.43325,
+        "idx04_body_joint4": 0.09555,
+        "idx05_body_joint5": 0.36285,
+        "idx21_arm_l_joint1": 1.31469,
+        "idx22_arm_l_joint2": -1.36424,
+        "idx23_arm_l_joint3": -0.49108,
+        "idx24_arm_l_joint4": -1.77168,
+        "idx25_arm_l_joint5": -1.90528,
+        "idx26_arm_l_joint6": -0.72147,
+        "idx27_arm_l_joint7": 0.12356,
+        "idx61_arm_r_joint1": 1.28656,
+        "idx62_arm_r_joint2": 1.29463,
+        "idx63_arm_r_joint3": -2.1835,
+        "idx64_arm_r_joint4": -2.13813,
+        "idx65_arm_r_joint5": -1.95729,
+        "idx66_arm_r_joint6": 0.94982,
+        "idx67_arm_r_joint7": 0.49682,
+        "base_x": 2.1336,
+        "base_y": 1.524,
+        "base_yaw": 1.5708
+      },
+      "relative_move": {
+        "dx_m": 0.0,
+        "dy_m": -0.0,
+        "dyaw_rad": -1.5708
+      },
+      "leg_check": {
+        "closest": "base_link<->hopper_base[drive]",
+        "min_env_clearance_m": 0.3407,
+        "min_self_clearance_m": 0.0283,
+        "min_hand_gap_m": 0.0381,
+        "max_coupled_violation": 0.0,
+        "max_torso_tilt_deg": 5.72,
+        "max_waist_shift_m": 0.1207
+      }
+    }
+  ],
+  "segments": [
+    {
+      "frm": "START",
+      "to": "TURN_TO_BIN",
+      "kind": "drive",
+      "ok": true,
+      "closest": "base_link<->hopper_base[drive]",
+      "min_env_clearance_m": 0.3337,
+      "min_self_clearance_m": 0.0262,
+      "min_hand_gap_m": 0.047,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 9.72,
+      "max_waist_shift_m": 0.1309
+    },
+    {
+      "frm": "TURN_TO_BIN",
+      "to": "DRIVE_TO_BIN",
+      "kind": "drive",
+      "ok": true,
+      "closest": "base_link<->bin_wall_w[drive]",
+      "min_env_clearance_m": 0.1239,
+      "min_self_clearance_m": 0.0262,
+      "min_hand_gap_m": 0.047,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 9.72,
+      "max_waist_shift_m": 0.1309
+    },
+    {
+      "frm": "DRIVE_TO_BIN",
+      "to": "PRE_SCOOP~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_l_camera_link<->bin_wall_w[sync]",
+      "min_env_clearance_m": 0.0824,
+      "min_self_clearance_m": 0.0262,
+      "min_hand_gap_m": 0.047,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 9.72,
+      "max_waist_shift_m": 0.1309,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.0749,
+        "closest": "gripper_l_camera_link<->bin_wall_w offset=(+3cm,-3cm,-2deg)",
+        "meets_5cm": true
+      }
+    },
+    {
+      "frm": "PRE_SCOOP~via",
+      "to": "PRE_SCOOP",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_l_camera_link<->bin_wall_w[indep]",
+      "min_env_clearance_m": 0.0722,
+      "min_self_clearance_m": 0.0256,
+      "min_hand_gap_m": 0.0348,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 9.67,
+      "max_waist_shift_m": 0.0553,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.0749,
+        "closest": "gripper_l_camera_link<->bin_wall_w offset=(+3cm,-3cm,-2deg)",
+        "meets_5cm": true
+      }
+    },
+    {
+      "frm": "PRE_SCOOP",
+      "to": "SCOOP_IN~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_l_camera_link<->bin_wall_w[indep]",
+      "min_env_clearance_m": 0.0664,
+      "min_self_clearance_m": 0.0283,
+      "min_hand_gap_m": 0.0349,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 9.72,
+      "max_waist_shift_m": 0.0769,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.0502,
+        "closest": "gripper_l_camera_link<->bin_wall_w offset=(-3cm,-3cm,+2deg)",
+        "meets_5cm": true
+      }
+    },
+    {
+      "frm": "SCOOP_IN~via",
+      "to": "SCOOP_IN",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_l_camera_link<->bin_wall_w[indep]",
+      "min_env_clearance_m": 0.0516,
+      "min_self_clearance_m": 0.029,
+      "min_hand_gap_m": 0.0369,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 9.82,
+      "max_waist_shift_m": 0.1274,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.0244,
+        "closest": "gripper_l_camera_link<->bin_wall_w offset=(-3cm,-3cm,+2deg)",
+        "meets_5cm": false
+      }
+    },
+    {
+      "frm": "SCOOP_IN",
+      "to": "SCOOP_SWEEP~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_l_camera_link<->bin_wall_w[indep]",
+      "min_env_clearance_m": 0.0574,
+      "min_self_clearance_m": 0.029,
+      "min_hand_gap_m": 0.0375,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 9.77,
+      "max_waist_shift_m": 0.1291,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.0244,
+        "closest": "gripper_l_camera_link<->bin_wall_w offset=(-3cm,-3cm,+2deg)",
+        "meets_5cm": false
+      }
+    },
+    {
+      "frm": "SCOOP_SWEEP~via",
+      "to": "SCOOP_SWEEP~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_l_camera_link<->bin_wall_w[indep]",
+      "min_env_clearance_m": 0.0648,
+      "min_self_clearance_m": 0.0496,
+      "min_hand_gap_m": 0.1694,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 9.02,
+      "max_waist_shift_m": 0.127,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.0436,
+        "closest": "gripper_l_camera_link<->bin_wall_w offset=(-3cm,-3cm,+2deg)",
+        "meets_5cm": false
+      }
+    },
+    {
+      "frm": "SCOOP_SWEEP~via",
+      "to": "SCOOP_SWEEP~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_l_camera_link<->bin_wall_w[indep]",
+      "min_env_clearance_m": 0.0795,
+      "min_self_clearance_m": 0.0495,
+      "min_hand_gap_m": 0.1567,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 8.98,
+      "max_waist_shift_m": 0.127,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.0449,
+        "closest": "gripper_l_camera_link<->bin_wall_w offset=(-3cm,-3cm,+2deg)",
+        "meets_5cm": false
+      }
+    },
+    {
+      "frm": "SCOOP_SWEEP~via",
+      "to": "SCOOP_SWEEP",
+      "kind": "arm",
+      "ok": true,
+      "closest": "arm_r_link5<->bin_wall_w[indep]",
+      "min_env_clearance_m": 0.0577,
+      "min_self_clearance_m": 0.0306,
+      "min_hand_gap_m": 0.0355,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 9.69,
+      "max_waist_shift_m": 0.1287,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.0337,
+        "closest": "gripper_l_camera_link<->bin_wall_w offset=(-3cm,-3cm,+2deg)",
+        "meets_5cm": false
+      }
+    },
+    {
+      "frm": "SCOOP_SWEEP",
+      "to": "SCOOP_LIFT~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "arm_l_link5<->bin_wall_w[indep]",
+      "min_env_clearance_m": 0.0564,
+      "min_self_clearance_m": 0.0307,
+      "min_hand_gap_m": 0.0355,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 9.69,
+      "max_waist_shift_m": 0.1287,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.0337,
+        "closest": "gripper_l_camera_link<->bin_wall_w offset=(-3cm,-3cm,+2deg)",
+        "meets_5cm": false
+      }
+    },
+    {
+      "frm": "SCOOP_LIFT~via",
+      "to": "SCOOP_LIFT",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_l_camera_link<->bin_wall_w[indep]",
+      "min_env_clearance_m": 0.0735,
+      "min_self_clearance_m": 0.0291,
+      "min_hand_gap_m": 0.0351,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 7.4,
+      "max_waist_shift_m": 0.0939,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.0514,
+        "closest": "gripper_l_camera_link<->bin_wall_w offset=(-3cm,-3cm,+2deg)",
+        "meets_5cm": true
+      }
+    },
+    {
+      "frm": "SCOOP_LIFT",
+      "to": "CARRY~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_l_camera_link<->bin_wall_w[indep]",
+      "min_env_clearance_m": 0.0646,
+      "min_self_clearance_m": 0.0291,
+      "min_hand_gap_m": 0.0351,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 7.17,
+      "max_waist_shift_m": 0.0795,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.0582,
+        "closest": "gripper_l_camera_link<->bin_wall_w offset=(-3cm,-3cm,+2deg)",
+        "meets_5cm": true
+      }
+    },
+    {
+      "frm": "CARRY~via",
+      "to": "CARRY~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_l_camera_link<->bin_wall_w[indep]",
+      "min_env_clearance_m": 0.0688,
+      "min_self_clearance_m": 0.0494,
+      "min_hand_gap_m": 0.0685,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 5.56,
+      "max_waist_shift_m": 0.0277,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.0708,
+        "closest": "gripper_l_camera_link<->bin_wall_w offset=(-3cm,-3cm,+2deg)",
+        "meets_5cm": true
+      }
+    },
+    {
+      "frm": "CARRY~via",
+      "to": "CARRY",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_l_camera_link<->bin_wall_w[sync]",
+      "min_env_clearance_m": 0.082,
+      "min_self_clearance_m": 0.0228,
+      "min_hand_gap_m": 0.0429,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 8.46,
+      "max_waist_shift_m": 0.1313,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.082,
+        "closest": "gripper_l_camera_link<->bin_wall_w offset=(+0cm,-3cm,-2deg)",
+        "meets_5cm": true
+      }
+    },
+    {
+      "frm": "CARRY",
+      "to": "BACK_OFF",
+      "kind": "drive",
+      "ok": true,
+      "closest": "base_link<->bin_wall_w[drive]",
+      "min_env_clearance_m": 0.1239,
+      "min_self_clearance_m": 0.0261,
+      "min_hand_gap_m": 0.043,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 8.46,
+      "max_waist_shift_m": 0.1313
+    },
+    {
+      "frm": "BACK_OFF",
+      "to": "TURN_LEFT",
+      "kind": "drive",
+      "ok": true,
+      "closest": "base_link<->bin_wall_w[drive]",
+      "min_env_clearance_m": 0.2822,
+      "min_self_clearance_m": 0.0261,
+      "min_hand_gap_m": 0.043,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 8.46,
+      "max_waist_shift_m": 0.1313
+    },
+    {
+      "frm": "TURN_LEFT",
+      "to": "DRIVE_NORTH",
+      "kind": "drive",
+      "ok": true,
+      "closest": "base_link<->bin_wall_w[drive]",
+      "min_env_clearance_m": 0.4186,
+      "min_self_clearance_m": 0.0261,
+      "min_hand_gap_m": 0.043,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 8.46,
+      "max_waist_shift_m": 0.1313
+    },
+    {
+      "frm": "DRIVE_NORTH",
+      "to": "TURN_TO_HOPPER",
+      "kind": "drive",
+      "ok": true,
+      "closest": "base_link<->hopper_base[drive]",
+      "min_env_clearance_m": 0.3767,
+      "min_self_clearance_m": 0.0261,
+      "min_hand_gap_m": 0.043,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 8.46,
+      "max_waist_shift_m": 0.1313
+    },
+    {
+      "frm": "TURN_TO_HOPPER",
+      "to": "RAISE~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_l_outer_link4<->hopper_wall_35[sync]",
+      "min_env_clearance_m": 0.3257,
+      "min_self_clearance_m": 0.0261,
+      "min_hand_gap_m": 0.0407,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 8.46,
+      "max_waist_shift_m": 0.1313
+    },
+    {
+      "frm": "RAISE~via",
+      "to": "RAISE~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_r_outer_link4<->hopper_wall_0[indep]",
+      "min_env_clearance_m": 0.2892,
+      "min_self_clearance_m": 0.0407,
+      "min_hand_gap_m": 0.0232,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 8.59,
+      "max_waist_shift_m": 0.127
+    },
+    {
+      "frm": "RAISE~via",
+      "to": "RAISE~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_r_outer_link4<->hopper_wall_0[indep]",
+      "min_env_clearance_m": 0.268,
+      "min_self_clearance_m": 0.0465,
+      "min_hand_gap_m": 0.0149,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 8.97,
+      "max_waist_shift_m": 0.127
+    },
+    {
+      "frm": "RAISE~via",
+      "to": "RAISE~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_r_outer_link4<->hopper_wall_0[indep]",
+      "min_env_clearance_m": 0.3297,
+      "min_self_clearance_m": 0.0457,
+      "min_hand_gap_m": 0.0297,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 9.17,
+      "max_waist_shift_m": 0.127
+    },
+    {
+      "frm": "RAISE~via",
+      "to": "RAISE",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_r_outer_link4<->hopper_wall_1[indep]",
+      "min_env_clearance_m": 0.3962,
+      "min_self_clearance_m": 0.0265,
+      "min_hand_gap_m": 0.0338,
+      "max_coupled_violation": 0.0003,
+      "max_torso_tilt_deg": 9.78,
+      "max_waist_shift_m": 0.1303
+    },
+    {
+      "frm": "RAISE",
+      "to": "DOCK",
+      "kind": "drive",
+      "ok": true,
+      "closest": "base_link<->hopper_base[drive]",
+      "min_env_clearance_m": 0.0985,
+      "min_self_clearance_m": 0.0265,
+      "min_hand_gap_m": 0.0338,
+      "max_coupled_violation": 0.0003,
+      "max_torso_tilt_deg": 9.78,
+      "max_waist_shift_m": 0.1303
+    },
+    {
+      "frm": "DOCK",
+      "to": "OVER_HOPPER~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "base_link<->hopper_base[sync]",
+      "min_env_clearance_m": 0.0985,
+      "min_self_clearance_m": 0.0259,
+      "min_hand_gap_m": 0.0338,
+      "max_coupled_violation": 0.0003,
+      "max_torso_tilt_deg": 9.78,
+      "max_waist_shift_m": 0.1303,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.0634,
+        "closest": "base_link<->hopper_base offset=(+3cm,+3cm,-2deg)",
+        "meets_5cm": true
+      }
+    },
+    {
+      "frm": "OVER_HOPPER~via",
+      "to": "OVER_HOPPER",
+      "kind": "arm",
+      "ok": true,
+      "closest": "arm_r_link4<->hopper_wall_1[sync]",
+      "min_env_clearance_m": 0.06,
+      "min_self_clearance_m": 0.0267,
+      "min_hand_gap_m": 0.0369,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 6.99,
+      "max_waist_shift_m": 0.0738,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.019,
+        "closest": "arm_r_link4<->hopper_wall_1 offset=(+3cm,+3cm,+2deg)",
+        "meets_5cm": false
+      }
+    },
+    {
+      "frm": "OVER_HOPPER",
+      "to": "POUR~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "arm_r_link4<->hopper_wall_1[indep]",
+      "min_env_clearance_m": 0.0532,
+      "min_self_clearance_m": 0.0294,
+      "min_hand_gap_m": 0.0369,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 7.78,
+      "max_waist_shift_m": 0.0207,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.019,
+        "closest": "arm_r_link4<->hopper_wall_1 offset=(+3cm,+3cm,+2deg)",
+        "meets_5cm": false
+      }
+    },
+    {
+      "frm": "POUR~via",
+      "to": "POUR~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "arm_r_link4<->hopper_wall_1[sync]",
+      "min_env_clearance_m": 0.0881,
+      "min_self_clearance_m": 0.0496,
+      "min_hand_gap_m": 0.0834,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 8.74,
+      "max_waist_shift_m": 0.0179,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.0549,
+        "closest": "arm_r_link4<->hopper_wall_1 offset=(+3cm,+3cm,+2deg)",
+        "meets_5cm": true
+      }
+    },
+    {
+      "frm": "POUR~via",
+      "to": "POUR~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "base_link<->hopper_base[sync]",
+      "min_env_clearance_m": 0.0985,
+      "min_self_clearance_m": 0.05,
+      "min_hand_gap_m": 0.1132,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 9.22,
+      "max_waist_shift_m": 0.0188,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.0634,
+        "closest": "base_link<->hopper_base offset=(+3cm,+3cm,-2deg)",
+        "meets_5cm": true
+      }
+    },
+    {
+      "frm": "POUR~via",
+      "to": "POUR",
+      "kind": "arm",
+      "ok": true,
+      "closest": "base_link<->hopper_base[sync]",
+      "min_env_clearance_m": 0.0985,
+      "min_self_clearance_m": 0.0284,
+      "min_hand_gap_m": 0.035,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 9.7,
+      "max_waist_shift_m": 0.0201,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.0634,
+        "closest": "base_link<->hopper_base offset=(+3cm,+3cm,-2deg)",
+        "meets_5cm": true
+      }
+    },
+    {
+      "frm": "POUR",
+      "to": "UNPOUR~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_l_camera_link<->hopper_wall_34[indep]",
+      "min_env_clearance_m": 0.0833,
+      "min_self_clearance_m": 0.0294,
+      "min_hand_gap_m": 0.0368,
+      "max_coupled_violation": 0.0036,
+      "max_torso_tilt_deg": 9.7,
+      "max_waist_shift_m": 0.0199,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.0634,
+        "closest": "base_link<->hopper_base offset=(+3cm,+3cm,-2deg)",
+        "meets_5cm": true
+      }
+    },
+    {
+      "frm": "UNPOUR~via",
+      "to": "UNPOUR~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "arm_r_link4<->hopper_wall_1[indep]",
+      "min_env_clearance_m": 0.075,
+      "min_self_clearance_m": 0.0498,
+      "min_hand_gap_m": 0.0964,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 8.74,
+      "max_waist_shift_m": 0.0188,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.0549,
+        "closest": "arm_r_link4<->hopper_wall_1 offset=(+3cm,+3cm,+2deg)",
+        "meets_5cm": true
+      }
+    },
+    {
+      "frm": "UNPOUR~via",
+      "to": "UNPOUR~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "arm_r_link4<->hopper_wall_1[indep]",
+      "min_env_clearance_m": 0.0676,
+      "min_self_clearance_m": 0.0494,
+      "min_hand_gap_m": 0.0894,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 7.78,
+      "max_waist_shift_m": 0.023,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.0416,
+        "closest": "arm_r_link4<->hopper_wall_1 offset=(+3cm,+3cm,+2deg)",
+        "meets_5cm": false
+      }
+    },
+    {
+      "frm": "UNPOUR~via",
+      "to": "UNPOUR~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "arm_r_link4<->hopper_wall_1[indep]",
+      "min_env_clearance_m": 0.0746,
+      "min_self_clearance_m": 0.0497,
+      "min_hand_gap_m": 0.0918,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 7.34,
+      "max_waist_shift_m": 0.0267,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.0397,
+        "closest": "arm_r_link4<->hopper_wall_1 offset=(+3cm,+3cm,+2deg)",
+        "meets_5cm": false
+      }
+    },
+    {
+      "frm": "UNPOUR~via",
+      "to": "UNPOUR",
+      "kind": "arm",
+      "ok": true,
+      "closest": "arm_r_link4<->hopper_wall_1[indep]",
+      "min_env_clearance_m": 0.0551,
+      "min_self_clearance_m": 0.0244,
+      "min_hand_gap_m": 0.0338,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 7.1,
+      "max_waist_shift_m": 0.0272,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.019,
+        "closest": "arm_r_link4<->hopper_wall_1 offset=(+3cm,+3cm,+2deg)",
+        "meets_5cm": false
+      }
+    },
+    {
+      "frm": "UNPOUR",
+      "to": "RETRACT",
+      "kind": "arm",
+      "ok": true,
+      "closest": "arm_r_link4<->hopper_wall_1[indep]",
+      "min_env_clearance_m": 0.058,
+      "min_self_clearance_m": 0.0226,
+      "min_hand_gap_m": 0.024,
+      "max_coupled_violation": 0.0004,
+      "max_torso_tilt_deg": 9.81,
+      "max_waist_shift_m": 0.1336,
+      "pose_budget": {
+        "budget": "+-3 cm, +-2 deg",
+        "min_env_clearance_m": 0.019,
+        "closest": "arm_r_link4<->hopper_wall_1 offset=(+3cm,+3cm,+2deg)",
+        "meets_5cm": false
+      }
+    },
+    {
+      "frm": "RETRACT",
+      "to": "UNDOCK",
+      "kind": "drive",
+      "ok": true,
+      "closest": "base_link<->hopper_base[drive]",
+      "min_env_clearance_m": 0.0985,
+      "min_self_clearance_m": 0.0264,
+      "min_hand_gap_m": 0.0342,
+      "max_coupled_violation": 0.0004,
+      "max_torso_tilt_deg": 9.81,
+      "max_waist_shift_m": 0.1336
+    },
+    {
+      "frm": "UNDOCK",
+      "to": "LOWER~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_l_outer_link4<->hopper_wall_0[sync]",
+      "min_env_clearance_m": 0.4317,
+      "min_self_clearance_m": 0.0264,
+      "min_hand_gap_m": 0.0341,
+      "max_coupled_violation": 0.0004,
+      "max_torso_tilt_deg": 10.11,
+      "max_waist_shift_m": 0.1409
+    },
+    {
+      "frm": "LOWER~via",
+      "to": "LOWER~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_l_outer_link4<->hopper_wall_0[sync]",
+      "min_env_clearance_m": 0.4053,
+      "min_self_clearance_m": 0.048,
+      "min_hand_gap_m": 0.0786,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 9.22,
+      "max_waist_shift_m": 0.1358
+    },
+    {
+      "frm": "LOWER~via",
+      "to": "LOWER~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_l_outer_link4<->hopper_wall_0[sync]",
+      "min_env_clearance_m": 0.3607,
+      "min_self_clearance_m": 0.046,
+      "min_hand_gap_m": 0.0733,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 9.39,
+      "max_waist_shift_m": 0.1448
+    },
+    {
+      "frm": "LOWER~via",
+      "to": "LOWER~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_l_outer_link4<->hopper_wall_35[sync]",
+      "min_env_clearance_m": 0.3321,
+      "min_self_clearance_m": 0.0463,
+      "min_hand_gap_m": 0.0734,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 8.7,
+      "max_waist_shift_m": 0.1445
+    },
+    {
+      "frm": "LOWER~via",
+      "to": "LOWER~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_r_outer_link4<->hopper_wall_1[sync]",
+      "min_env_clearance_m": 0.3195,
+      "min_self_clearance_m": 0.0463,
+      "min_hand_gap_m": 0.0736,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 8.09,
+      "max_waist_shift_m": 0.1442
+    },
+    {
+      "frm": "LOWER~via",
+      "to": "LOWER~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_r_inner_link4<->hopper_wall_1[sync]",
+      "min_env_clearance_m": 0.3177,
+      "min_self_clearance_m": 0.0458,
+      "min_hand_gap_m": 0.0726,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 7.58,
+      "max_waist_shift_m": 0.1435
+    },
+    {
+      "frm": "LOWER~via",
+      "to": "LOWER~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_r_inner_link4<->hopper_wall_1[sync]",
+      "min_env_clearance_m": 0.3217,
+      "min_self_clearance_m": 0.0463,
+      "min_hand_gap_m": 0.066,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 7.12,
+      "max_waist_shift_m": 0.142
+    },
+    {
+      "frm": "LOWER~via",
+      "to": "LOWER~via",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_r_inner_link4<->hopper_wall_1[sync]",
+      "min_env_clearance_m": 0.3379,
+      "min_self_clearance_m": 0.0473,
+      "min_hand_gap_m": 0.0605,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 6.78,
+      "max_waist_shift_m": 0.14
+    },
+    {
+      "frm": "LOWER~via",
+      "to": "LOWER",
+      "kind": "arm",
+      "ok": true,
+      "closest": "gripper_r_inner_link4<->hopper_wall_1[sync]",
+      "min_env_clearance_m": 0.3659,
+      "min_self_clearance_m": 0.0283,
+      "min_hand_gap_m": 0.0358,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 6.56,
+      "max_waist_shift_m": 0.1377
+    },
+    {
+      "frm": "LOWER",
+      "to": "TURN_HOME",
+      "kind": "drive",
+      "ok": true,
+      "closest": "base_link<->hopper_base[drive]",
+      "min_env_clearance_m": 0.3838,
+      "min_self_clearance_m": 0.0283,
+      "min_hand_gap_m": 0.0381,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 5.72,
+      "max_waist_shift_m": 0.1207
+    },
+    {
+      "frm": "TURN_HOME",
+      "to": "DRIVE_SOUTH",
+      "kind": "drive",
+      "ok": true,
+      "closest": "base_link<->bin_wall_w[drive]",
+      "min_env_clearance_m": 0.4086,
+      "min_self_clearance_m": 0.0283,
+      "min_hand_gap_m": 0.0381,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 5.72,
+      "max_waist_shift_m": 0.1207
+    },
+    {
+      "frm": "DRIVE_SOUTH",
+      "to": "TURN_WEST",
+      "kind": "drive",
+      "ok": true,
+      "closest": "base_link<->bin_wall_w[drive]",
+      "min_env_clearance_m": 0.2907,
+      "min_self_clearance_m": 0.0283,
+      "min_hand_gap_m": 0.0381,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 5.72,
+      "max_waist_shift_m": 0.1207
+    },
+    {
+      "frm": "TURN_WEST",
+      "to": "DRIVE_HOME",
+      "kind": "drive",
+      "ok": true,
+      "closest": "base_link<->bin_wall_w[drive]",
+      "min_env_clearance_m": 0.3627,
+      "min_self_clearance_m": 0.0283,
+      "min_hand_gap_m": 0.0381,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 5.72,
+      "max_waist_shift_m": 0.1207
+    },
+    {
+      "frm": "DRIVE_HOME",
+      "to": "TURN_FINAL",
+      "kind": "drive",
+      "ok": true,
+      "closest": "base_link<->hopper_base[drive]",
+      "min_env_clearance_m": 0.3407,
+      "min_self_clearance_m": 0.0283,
+      "min_hand_gap_m": 0.0381,
+      "max_coupled_violation": 0.0,
+      "max_torso_tilt_deg": 5.72,
+      "max_waist_shift_m": 0.1207
+    }
+  ]
+}

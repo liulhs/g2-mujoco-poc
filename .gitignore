@@ -1,0 +1,22 @@
+# Allowlist: ignore everything, then opt files in explicitly.
+# Keeps keys (.aws-geniesim), business documents, Genie Sim assets (G2/) and build output out.
+/*
+!/.gitignore
+!/README.md
+!/THIRD_PARTY_NOTICES.md
+!/docs/
+!/sim/
+
+/sim/.venv/
+/sim/build/
+/sim/official/
+/sim/**/__pycache__/
+/sim/**/.pytest_cache/
+/sim/out/*
+!/sim/out/bimanual_plan.json
+!/sim/out/replay_report_bimanual_plan.json
+*.log
+*.mp4
+*.pem
+*.env
+.DS_Store
