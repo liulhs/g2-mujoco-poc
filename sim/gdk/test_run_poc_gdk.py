@@ -83,6 +83,9 @@ class FakePnc:
     def get_task_state(self) -> dict:
         return {"state": self.final_state}
 
+    def cancel_task(self) -> None:
+        self.robot.log.append("cancel")
+
 
 def _navi_req():
     return types.SimpleNamespace(target=types.SimpleNamespace(position=types.SimpleNamespace(x=0.0, y=0.0),
@@ -222,7 +225,8 @@ def test_generated_plans_are_well_formed(plan: Path) -> None:
         return
     p = rp.load_plan(plan)
     steps = rp.plan_steps(p.moves, p.moves[0].joints, 0.3)
-    assert all(max(s.velocities) <= 0.3 + 1e-9 for s in steps if s.kind == "joints")
+    joint_steps = [s for s in steps if s.kind == "joints"] + [j for s in steps if s.kind == "combo" for j in s.sub]
+    assert all(max(s.velocities) <= 0.3 + 1e-9 for s in joint_steps)
     assert not any(math.isnan(v) for s in steps for v in s.positions)
     assert rp.main(["--waypoints", str(plan)]) == 0
 
@@ -273,3 +277,35 @@ def test_chassis_failure_stops_the_run(tmp_path: Path, monkeypatch: pytest.Monke
     robot = FakeRobot()
     _install(monkeypatch, robot, [rp.ESTOP_PHRASE, "RELOCALIZED"] + [""] * 10, pnc_state=8)
     assert _run(_drive_doc(tmp_path, dict(dx_m=0.7, dy_m=0.0, dyaw_rad=0.0))) == 2
+
+
+def _combo_doc(tmp_path: Path, rel: dict) -> Path:
+    base = {n: 0.0 for n in rp.COMMANDED}
+    wps = [dict(name="START", note="", kind="arm", gripper=0.0, joints=dict(base)),
+           dict(name="LEG~via", note="", kind="drive", combo_group="LEG", gripper=0.0,
+                joints={**base, "idx61_arm_r_joint1": 0.1}),
+           dict(name="LEG", note="", kind="drive", combo_group="LEG", gripper=0.0,
+                joints={**base, "idx61_arm_r_joint1": 0.2}, relative_move=rel)]
+    p = tmp_path / "c.json"
+    p.write_text(json.dumps(dict(all_ok=True, expected_arm="crs", layout=dict(measured=True), waypoints=wps)))
+    return p
+
+
+def test_arms_move_while_chassis_translates(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    robot = FakeRobot()
+    _install(monkeypatch, robot, [rp.ESTOP_PHRASE, "RELOCALIZED"] + [""] * 10)
+    assert _run(_combo_doc(tmp_path, dict(dx_m=0.0, dy_m=-1.0, dyaw_rad=0.0))) == 0
+    assert robot.log == ["grip:+0.000", "drive:+0.000,-1.000,+0.0", "joints:g2_poc:LEG~via", "joints:g2_poc:LEG"]
+
+
+def test_arms_may_not_move_during_a_turn(tmp_path: Path) -> None:
+    plan = rp.load_plan(_combo_doc(tmp_path, dict(dx_m=0.0, dy_m=0.0, dyaw_rad=1.0)))
+    with pytest.raises(rp.Abort, match="translation"):
+        rp.plan_steps(plan.moves, plan.moves[0].joints, 0.3)
+
+
+def test_chassis_is_cancelled_when_an_arm_move_fails(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    robot = FakeRobot(rc=5)
+    _install(monkeypatch, robot, [rp.ESTOP_PHRASE, "RELOCALIZED"] + [""] * 10)
+    assert _run(_combo_doc(tmp_path, dict(dx_m=0.5, dy_m=0.0, dyaw_rad=0.0))) == 2
+    assert robot.log[-2:] == ["joints:g2_poc:LEG~via", "cancel"]

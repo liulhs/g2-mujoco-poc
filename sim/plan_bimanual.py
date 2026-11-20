@@ -37,14 +37,16 @@ RIM_BIN = g2_model.SOURCE_BIN["h"] * IN
 HOP = g2_model.HOPPER
 HOP_C = np.array([HOP["cx"], HOP["cy"]]) * IN
 
-# chassis poses: (x_in, y_in, yaw_deg). Every leg is a pure turn or a straight forward/backward drive.
+# chassis poses: (x_in, y_in, yaw_deg). Every leg is a pure turn or a pure translation (the swerve
+# base can translate in any direction, so sideways/diagonal moves replace turn-drive-turn).
 START = (84.0, 60.0, 90.0)          # centre of the drawing's G2 placement area, facing +y
 BIN_STATION = (float(os.environ.get("BIN_STATION_X", "112")), 60.0, 0.0)  # front edge ~5 in from the bin wall
 BIN_BACKOFF = (103.0, 60.0, 0.0)
-TURN_POINT = (103.0, 105.5, 90.0)   # in line with the hopper centre
-HOP_STANDOFF = (103.0, 105.5, 180.0)
+TURN_POINT = (103.0, 60.0, 180.0)   # turned around at the back-off point
+HOP_STANDOFF = (103.0, 105.5, 180.0)  # in line with the hopper centre, facing it
 HOP_DOCK = (float(os.environ.get("HOP_DOCK_X", "89")), 105.5, 180.0)      # front edge ~4 in from the hopper base
-HOME_TURN = (103.0, 60.0, 270.0)
+HOME_TURN = (84.0, 60.0, 180.0)     # back at the start spot, still facing west
+GRID = 21                           # chassis x arm progress samples per axis for overlapped legs
 STATIONS = {"bin": BIN_STATION, "hopper": HOP_DOCK}
 
 GRIP = ik.GRIP_CLOSED               # both Omnipickers closed the whole time (cupping posture)
@@ -91,31 +93,28 @@ HAND_Z_OVER = float(os.environ.get("HAND_Z_OVER", "1.55"))   # hands height when
 POUR_Z = float(os.environ.get("POUR_Z", "1.36"))
 POUR_DEG = float(os.environ.get("POUR_DEG", "55"))
 RAISE = ArmGoal("RAISE", "raise the cupped hands above the 50 in rim, below the frame", (0.42, 0.0, HAND_Z_OVER), 0.0)
+PRE_SCOOP = ArmGoal("PRE_SCOOP", "1 both hands above the bin, tilted down",
+                    ((139 - BIN_STATION[0]) * IN, 0.0, RIM_BIN + 0.12), 60.0)   # base frame at BIN_STATION
+# ("drive", name, note, pose[, ArmGoal]): with an ArmGoal (base frame) the arms move DURING the chassis
+# leg; the leg is checked for every combination of chassis and arm progress, and falls back to
+# "arms first, then drive" if that check fails.
 SEQUENCE: list[tuple] = [
     ("arm", ArmGoal("START", "start: hands cupped in front", CARRY.pos, 0.0), START),
     ("drive", "TURN_TO_BIN", "turn in place to face the source bin", (START[0], START[1], 0.0)),
-    ("drive", "DRIVE_TO_BIN", "drive forward to the source bin", BIN_STATION),
-    ("arm", ArmGoal("PRE_SCOOP", "1 both hands above the bin, tilted down", (139 * IN, 60 * IN, RIM_BIN + 0.12), 60.0, True), None),
+    ("drive", "DRIVE_TO_BIN", "drive forward to the source bin, hands moving above the bin", BIN_STATION, PRE_SCOOP),
     ("arm", ArmGoal("SCOOP_IN", "2 dip both hands into the bin", (140 * IN, 60 * IN, RIM_BIN - 0.05), 60.0, True), None),
     ("arm", ArmGoal("SCOOP_SWEEP", "3 scoop forward, rolling the hands up", (141 * IN, 60 * IN, RIM_BIN - 0.02), 30.0, True, 0.03, 10.0), None),
     ("arm", ArmGoal("SCOOP_LIFT", "4 lift the handful out level", (140 * IN, 60 * IN, RIM_BIN + 0.15), 0.0, True), None),
-    ("arm", ArmGoal("CARRY", CARRY.note, CARRY.pos, 0.0), None),
-    ("drive", "BACK_OFF", "back away from the bin, holding", BIN_BACKOFF),
-    ("drive", "TURN_LEFT", "turn in place to face the hopper row, holding", (BIN_BACKOFF[0], BIN_BACKOFF[1], 90.0)),
-    ("drive", "DRIVE_NORTH", "drive forward, holding", TURN_POINT),
-    ("drive", "TURN_TO_HOPPER", "turn in place to face the hopper, holding", HOP_STANDOFF),
-    ("arm", ArmGoal("RAISE", RAISE.note, RAISE.pos, 0.0), None),
+    ("drive", "BACK_OFF", "back away from the bin, bringing the cupped hands to the chest", BIN_BACKOFF, CARRY),
+    ("drive", "TURN_AROUND", "turn around in place, holding", TURN_POINT),
+    ("drive", "SLIDE_TO_HOPPER", "slide sideways to the hopper, raising the cupped hands", HOP_STANDOFF, RAISE),
     ("drive", "DOCK", "move up to the hopper with hands raised", HOP_DOCK),
     ("arm", ArmGoal("OVER_HOPPER", "5 reach over the rim into the hopper", (63 * IN, 105.5 * IN, HAND_Z_OVER), 0.0, True), None),
     ("arm", ArmGoal("POUR", "6 tip both hands down into the hopper: pour", (60 * IN, 105.5 * IN, POUR_Z), POUR_DEG, True, 0.03, 12.0), None),
-    ("arm", "UNPOUR", "level the hands again", "OVER_HOPPER"),
-    ("arm", ArmGoal("RETRACT", "pull the hands back over the rim", RAISE.pos, 0.0), None),
-    ("drive", "UNDOCK", "back off from the hopper", HOP_STANDOFF),
-    ("arm", ArmGoal("LOWER", "lower to the carry posture", CARRY.pos, 0.0), None),
-    ("drive", "TURN_HOME", "turn in place to face south", (HOP_STANDOFF[0], HOP_STANDOFF[1], 270.0)),
-    ("drive", "DRIVE_SOUTH", "drive forward", HOME_TURN),
-    ("drive", "TURN_WEST", "turn in place to face west", (HOME_TURN[0], HOME_TURN[1], 180.0)),
-    ("drive", "DRIVE_HOME", "drive forward to the start", (START[0], START[1], 180.0)),
+    ("drive", "UNDOCK", "back off from the hopper, levelling the hands and pulling them back over the rim",
+     HOP_STANDOFF, ArmGoal("RETRACT", "level the hands and pull them back over the rim", RAISE.pos, 0.0)),
+    ("drive", "RETURN", "slide diagonally back to the start, lowering the hands",
+     HOME_TURN, ArmGoal("LOWER", "lower to the carry posture", CARRY.pos, 0.0)),
     ("drive", "TURN_FINAL", "turn to the start heading", START),
 ]
 
@@ -141,11 +140,21 @@ def _drive_profile(qa: dict[str, float], qb: dict[str, float]):
         yield "drive", dict(zip(names, a + s * (b - a)))
 
 
+def _combo_profile(qa: dict[str, float], qb: dict[str, float]):
+    """Arms and chassis move together but with unknown relative timing: every progress pair."""
+    names = list(qa)
+    a, b = np.array([qa[n] for n in names]), np.array([qb[n] for n in names])
+    base = np.array([n in ik.BASE for n in names])
+    for sa in np.linspace(0.0, 1.0, GRID):
+        for sb in np.linspace(0.0, 1.0, GRID):
+            yield "combo", dict(zip(names, a + np.where(base, sb, sa) * (b - a)))
+
+
 def path_check(chk: ik.Checker, qa: dict[str, float], qb: dict[str, float], kind: str) -> dict:
     env_pairs, m = chk.env_pairs(), chk.model
     worst_env, worst_self, worst_hand, worst_cpl, near = 1.0, 1.0, 1.0, -1.0, ""
     worst_tilt, worst_shift = 0.0, 0.0
-    gen = _drive_profile(qa, qb) if kind == "drive" else _arm_profiles(qa, qb)
+    gen = {"drive": _drive_profile, "combo": _combo_profile}.get(kind, _arm_profiles)(qa, qb)
     for prof, q in gen:
         chk.set_q(q)
         d_env, (ga, gb) = chk.min_distance(env_pairs, 1.0)
@@ -224,6 +233,47 @@ def _via(chk: ik.Checker, a: dict, b: dict, depth: int) -> list[dict]:
     return _via(chk, a, w, depth + 1) + [w] + _via(chk, w, b, depth + 1)
 
 
+def _combo_chain(chk: ik.Checker, prev_wp: dict, q_end: dict[str, float], rep_end: ik.Report,
+                 name: str, note: str, goal_name: str) -> tuple[list[dict] | None, dict | None]:
+    """Arms follow their (via-refined) path while the chassis drives the whole leg.
+
+    Each arm sub-segment is checked against EVERY chassis position of the leg, so the result
+    holds for any relative timing of arms and chassis on the real robot.
+    Returns the group's waypoints (base joints at the arm-progress fraction) or None.
+    """
+    qa = prev_wp["joints"]
+    base_a = {n: qa[n] for n in ik.BASE}
+    base_b = {n: q_end[n] for n in ik.BASE}
+    # arm path at a fixed chassis pose (arm self/hand clearance does not depend on the chassis)
+    a_fix = {**prev_wp, "joints": dict(qa)}
+    b_fix = {**prev_wp, "name": name, "joints": {**q_end, **base_a}}
+    vias = _via(chk, a_fix, b_fix, 0)
+    chain = [w["joints"] for w in vias] + [b_fix["joints"]]
+    reps = [ik.Report(**w["check"]) for w in vias] + [rep_end]
+    oks = [w["ok"] for w in vias] + [True]
+    arm_names = [n for n in qa if n not in ik.BASE]
+    travel = [max(abs(q1[n] - q0[n]) for n in arm_names) for q0, q1 in zip([qa] + chain[:-1], chain)]
+    total = sum(travel) or 1.0
+    frac, members, worst = 0.0, [], None
+    for i, (q_arm, rep, ok, tr) in enumerate(zip(chain, reps, oks, travel)):
+        q0 = {**(members[-1]["joints"] if members else qa), **base_a}
+        pc = path_check(chk, q0, {**q_arm, **base_b}, "combo")
+        if not (ok and segment_ok(pc)):
+            return None, pc
+        frac += tr / total
+        q = {**q_arm, **{n: base_a[n] + frac * (base_b[n] - base_a[n]) for n in ik.BASE}}
+        last = i == len(chain) - 1
+        extra = dict(combo_group=name, leg_check=pc)
+        if last:
+            extra.update(relative_move=relative_move(qa, q_end), arms_during_drive=goal_name)
+        members.append(_waypoint(chk, name if last else f"{name}~via",
+                                 f"{note} [{goal_name} during the leg]" if last else "auto via-point (arms, during the leg)",
+                                 "drive", q_end if last else q, rep, ok, extra))
+        if worst is None or pc["min_env_clearance_m"] < worst["min_env_clearance_m"]:
+            worst = pc
+    return members, worst
+
+
 def relative_move(qa: dict[str, float], qb: dict[str, float]) -> dict:
     """GDK relative_move target, in the chassis frame at the start of the leg."""
     yaw0 = qa["base_yaw"]
@@ -245,10 +295,48 @@ def main() -> int:
     for item in SEQUENCE:
         kind = item[0]
         if kind == "drive":
-            _, name, note, pose = item
+            _, name, note, pose = item[:4]
+            goal = item[4] if len(item) > 4 else None
             target_yaw = np.deg2rad(pose[2])
             prev = wps[-1]["joints"]
             arms = {n: v for n, v in prev.items() if n not in ik.BASE}
+            if goal is not None:
+                # arms move during the leg: solve the base-frame goal at the leg's end pose
+                bq_end = base_q(pose)
+                tg = hand_targets(goal, bq_end)
+                fixed = {**fixed_static, **bq_end}
+                q_arm = seed
+                for _ in range(3):
+                    q_arm = ik.solve_multi(chk, tg, q_arm, fixed)
+                    if ik.evaluate_multi(chk, {**fixed, **q_arm}, tg).ok(next(iter(tg.values()))):
+                        break
+                q_end = {**fixed, **q_arm}
+                rep_end = ik.evaluate_multi(chk, q_end, tg)
+                arm_ok = rep_end.ok(next(iter(tg.values())))
+                members, pc = (_combo_chain(chk, wps[-1], q_end, rep_end, name, note, goal.name)
+                               if arm_ok else (None, None))
+                if members:
+                    seed = {n: q_end[n] for n in ik.BIMANUAL_JOINTS}
+                    bq = {n: q_end[n] for n in ik.BASE}
+                    wps.extend(members)
+                    all_ok &= all(m_["ok"] for m_ in members)
+                    print(f"combo {name:16s} ok=True  {len(members)} arm moves during the leg, "
+                          f"env={pc['min_env_clearance_m']:.3f} self={pc['min_self_clearance_m']:.3f} "
+                          f"rel={members[-1]['relative_move']}", flush=True)
+                    continue
+                print(f"combo {name:16s} overlap rejected (arm_ok={arm_ok}, leg={pc}); arms first, then drive",
+                      flush=True)
+                # fallback: same arm goal at the current base pose (base-frame goal), then the plain leg
+                tg = hand_targets(goal, bq)
+                fixed = {**fixed_static, **bq}
+                q_arm = ik.solve_multi(chk, tg, seed, fixed)
+                q_a = {**fixed, **q_arm}
+                rep_a = ik.evaluate_multi(chk, q_a, tg)
+                wps.append(_waypoint(chk, goal.name, goal.note, "arm", q_a, rep_a, rep_a.ok(next(iter(tg.values())))))
+                all_ok &= wps[-1]["ok"]
+                seed = {n: q_a[n] for n in ik.BIMANUAL_JOINTS}
+                prev = wps[-1]["joints"]
+                arms = {n: v for n, v in prev.items() if n not in ik.BASE}
             # choose the shorter / clearer rotation direction
             best = None
             for k in (-1, 0, 1):
@@ -337,7 +425,7 @@ def main() -> int:
         layout=dict(measured=os.environ.get("LAYOUT_MEASURED", "0") == "1",
                     stations_in_deg=dict(start=START, bin=BIN_STATION, bin_backoff=BIN_BACKOFF,
                                          turn_point=TURN_POINT, hopper_standoff=HOP_STANDOFF, hopper_dock=HOP_DOCK,
-                                         home_turn=HOME_TURN),
+                                         home_return=HOME_TURN),
                     overhead_frame_modelled=g2_model.FRAME_SLAB_IN > 0,
                     assumed=dict(bin_height_in=g2_model.SOURCE_BIN["h"], frame_top_in=g2_model.FRAME_TOP_IN,
                                  frame_beam_depth_in=g2_model.FRAME_SLAB_IN, frame_posts="not modelled")),

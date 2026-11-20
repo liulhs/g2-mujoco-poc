@@ -47,24 +47,23 @@ def tr(zh: str, en: str) -> str:
 STEP_TEXT = {  # name: (stage, zh, en)   6 stages
     "START": ("0", "起点：双手合拢在胸前", "Start: hands cupped together"),
     "TURN_TO_BIN": ("1", "原地转向料桶", "Turn in place toward the bin"),
-    "DRIVE_TO_BIN": ("1", "开到料桶前", "Drive to the source bin"),
+    "DRIVE_TO_BIN": ("1", "开到料桶前，同时把手伸到桶口上方", "Drive to the bin, hands moving over it"),
     "PRE_SCOOP": ("2", "双手移到桶口上方", "Both hands above the bin"),
     "SCOOP_IN": ("2", "双手伸进桶口", "Dip both hands in"),
     "SCOOP_SWEEP": ("2", "向前捧起", "Scoop forward"),
     "SCOOP_LIFT": ("2", "捧着抬起", "Lift the handful"),
     "CARRY": ("3", "双手端平，准备移动", "Hold level, ready to move"),
     "BACK_OFF": ("3", "端着后退", "Back off, holding"),
-    "TURN_LEFT": ("3", "端着原地左转", "Turn left in place, holding"),
-    "DRIVE_NORTH": ("3", "端着向前开", "Drive forward, holding"),
-    "TURN_TO_HOPPER": ("3", "端着转向料斗", "Turn to face the hopper, holding"),
-    "DRIVE_TO_HOPPER": ("3", "端着开到料斗", "Drive to the hopper, holding"),
+    "TURN_AROUND": ("3", "端着原地掉头", "Turn around in place, holding"),
+    "SLIDE_TO_HOPPER": ("3", "端着横移到料斗，同时抬手", "Slide sideways to the hopper, raising the hands"),
     "RAISE": ("4", "双手抬过料斗沿", "Raise the hands above the rim"),
     "DOCK": ("4", "靠近料斗", "Move up to the hopper"),
     "OVER_HOPPER": ("4", "双手伸到料斗上方", "Reach over the hopper"),
     "POUR": ("5", "双手翻腕倒出", "Tip both hands: pour"),
     "UNPOUR": ("5", "双手放平", "Level the hands"),
     "RETRACT": ("6", "收回双手", "Pull the hands back"),
-    "UNDOCK": ("6", "离开料斗", "Back away from the hopper"),
+    "UNDOCK": ("6", "离开料斗，同时放平双手", "Back away, levelling the hands"),
+    "RETURN": ("6", "斜着开回起点，同时放低双手", "Slide back to the start, lowering the hands"),
     "LOWER": ("6", "放低到端持姿势", "Lower to the carry posture"),
     "TURN_HOME": ("6", "原地转向", "Turn in place"),
     "DRIVE_SOUTH": ("6", "向前开", "Drive forward"),
@@ -309,7 +308,7 @@ def draw_hud(img: Image.Image, fonts: Fonts, dbg: Debug, labels: list[tuple], ba
     d.text((44, y0 + 12), "DEBUG", font=fonts.mid, fill=(120, 220, 255, 255))
     env_col = tuple(int(255 * c) for c in margin_colour(dbg.env_d)[:3]) + (255,)
     rows = [
-        (f"t = {dbg.t:6.2f} s    joint speed cap 0.30 rad/s", (230, 230, 230, 255)),
+        (f"t = {dbg.t:6.2f} s    joint speed cap {replay.MAX_JOINT_SPEED:.2f} rad/s", (230, 230, 230, 255)),
         (f"grippers L+R {'OPEN -0.785' if dbg.gripper < -0.4 else 'CLOSED 0.000'}   chassis ({dbg.base[0]:5.1f},{dbg.base[1]:5.1f}) in {dbg.base[2]:4.0f}°", (230, 230, 230, 255)),
         (f"env clearance {dbg.env_d * 100:6.1f} cm  (run min "
          f"{'  -- ' if dbg.env_min_run >= 1.0 else f'{dbg.env_min_run * 100:4.1f}'} cm, need >=5)", env_col),

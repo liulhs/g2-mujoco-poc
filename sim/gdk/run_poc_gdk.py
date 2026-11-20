@@ -3,6 +3,10 @@
 Arm/waist/head waypoints -> Robot.joint_control_request; both Omnipickers ->
 Robot.move_ee_pos (left_tool / right_tool); chassis legs -> Pnc.relative_move
 (turns over 90 deg are split so the robot cannot choose the other direction).
+"Arms-during-drive" legs (waypoints sharing a combo_group) start the relative_move, send the
+arm poses while the chassis translates, then wait for the chassis; the planner checked those
+legs for every combination of chassis and arm progress, so their relative timing does not matter.
+If an arm move fails during such a leg, the chassis task is cancelled.
 
 Default is a DRY RUN that only prints the plan. Real motion needs --execute plus the
 safety confirmations below; every move waits for Enter unless --no-step is allowed.
@@ -44,7 +48,7 @@ ARM_L = [f"idx2{i}_arm_l_joint{i}" for i in range(1, 8)]
 HEAD = ["idx11_head_joint1", "idx12_head_joint2", "idx13_head_joint3"]
 COMMANDED = BODY + HEAD + ARM_L + ARM_R
 
-MAX_SPEED = 0.3            # rad/s, upper bound regardless of --speed
+MAX_SPEED = 0.5            # rad/s, upper bound regardless of --speed (the plan is physics-replayed at 0.5)
 APPROACH_SPEED = 0.1       # rad/s, for the optional unchecked move to the first pose
 START_TOL = 0.05           # rad, robot must be this close to the first waypoint
 REACHED_TOL = 0.02         # rad, post-move check
@@ -68,11 +72,12 @@ class Move:
     gripper: float
     kind: str = "arm"                                 # "arm" or "drive"
     rel: tuple[float, float, float] | None = None     # (dx m, dy m, dyaw rad) in the chassis frame
+    group: str | None = None                          # drive leg during which the arms move
 
 
 @dataclass(frozen=True)
 class Step:
-    kind: str                 # "joints", "gripper" or "chassis"
+    kind: str                 # "joints", "gripper", "chassis" or "combo" (arms move while the chassis drives)
     name: str
     note: str
     names: tuple[str, ...] = ()
@@ -81,6 +86,7 @@ class Step:
     duration: float = 0.0
     gripper: float = 0.0
     rel: tuple[float, float, float] = (0.0, 0.0, 0.0)
+    sub: tuple["Step", ...] = ()   # combo: joint steps sent while the chassis leg runs
 
 
 @dataclass(frozen=True)
@@ -103,11 +109,13 @@ def load_plan(path: Path) -> Plan:
         if missing:
             raise Abort(f"waypoint {w['name']} lacks joints {missing}")
         rel = None
-        if w.get("kind") == "drive":
+        if w.get("kind") == "drive" and "relative_move" in w:
             r = w["relative_move"]
             rel = (float(r["dx_m"]), float(r["dy_m"]), float(r["dyaw_rad"]))
+        elif w.get("kind") == "drive" and not w.get("combo_group"):
+            raise Abort(f"drive waypoint {w['name']} has no relative_move")
         moves.append(Move(w["name"], w.get("note", ""), {n: float(w["joints"][n]) for n in COMMANDED},
-                          float(w["gripper"]), w.get("kind", "arm"), rel))
+                          float(w["gripper"]), w.get("kind", "arm"), rel, w.get("combo_group")))
     return Plan(moves, doc["expected_arm"], bool(doc.get("layout", {}).get("measured")), path)
 
 
@@ -136,10 +144,36 @@ def chassis_legs(name: str, note: str, rel: tuple[float, float, float]) -> list[
             for i in range(n)]
 
 
+def combo_step(group: list[Move], q_prev: dict[str, float], vmax: float) -> Step:
+    """One chassis translation with the arm path (its via-points) sent while it drives."""
+    last = group[-1]
+    if last.rel is None or any(m.rel is not None for m in group[:-1]):
+        raise Abort(f"{last.name}: only the last waypoint of an arms-during-drive leg may carry the relative_move")
+    if abs(last.rel[2]) > 1e-3:
+        raise Abort(f"{last.name}: arms may only move during a pure translation, not a turn")
+    sub, q = [], q_prev
+    for m in group:
+        if any(abs(m.joints[n] - q[n]) > 1e-4 for n in COMMANDED):
+            sub.append(_joint_step(m.name, m.note, q, m.joints, vmax))
+        q = m.joints
+    return Step("combo", last.name, last.note, rel=last.rel, sub=tuple(sub))
+
+
 def plan_steps(moves: list[Move], start: dict[str, float], vmax: float) -> list[Step]:
     """Joint move to each waypoint, then any gripper change; drive legs become chassis steps."""
     steps, q_prev, g_prev = [], start, None
-    for mv in moves:
+    i = 0
+    while i < len(moves):
+        mv = moves[i]
+        i += 1
+        if mv.group:
+            group = [mv]
+            while i < len(moves) and moves[i].group == mv.group:
+                group.append(moves[i])
+                i += 1
+            steps.append(combo_step(group, q_prev, vmax))
+            q_prev = group[-1].joints
+            continue
         if mv.kind == "drive":
             if any(abs(mv.joints[n] - q_prev[n]) > 1e-4 for n in COMMANDED):
                 raise Abort(f"{mv.name}: arms must hold their pose during a chassis leg")
@@ -259,13 +293,37 @@ class G2:
         return int(d.get("state", d.get("task_state", -1)))
 
     def relative_move(self, step: Step) -> None:
+        self.start_relative_move(step)
+        self.wait_chassis(step)
+
+    def start_relative_move(self, step: Step) -> None:
         if self.pnc is None:
             raise Abort("this GDK build has no Pnc client; cannot drive the chassis")
         dx, dy, dyaw = step.rel
         req = self.gdk.NaviReq()
         req.target.position.x, req.target.position.y = dx, dy
         req.target.orientation.z, req.target.orientation.w = math.sin(dyaw / 2), math.cos(dyaw / 2)
-        self.pnc.relative_move(req)  # no return value; raises on failure
+        self.pnc.relative_move(req)  # no return value; raises on failure; returns while the leg runs
+
+    def cancel_chassis(self) -> None:
+        if self.pnc is not None and hasattr(self.pnc, "cancel_task"):
+            try:
+                self.pnc.cancel_task()
+            except Exception as exc:
+                LOG.warning("cancel_task raised %s", exc)
+
+    def combo(self, step: Step) -> None:
+        """Start the chassis leg, send the arm path while it drives, then wait for the chassis."""
+        self.start_relative_move(step)
+        try:
+            for js in step.sub:
+                self.move_joints(js)
+        except BaseException:
+            self.cancel_chassis()
+            raise
+        self.wait_chassis(step)
+
+    def wait_chassis(self, step: Step) -> None:
         t0 = time.time()
         while time.time() - t0 < CHASSIS_TIMEOUT:
             state = self._task_state()
@@ -274,11 +332,7 @@ class G2:
             if state in (TASK_FAIL, TASK_CANCELED):
                 raise Abort(f"{step.name}: relative_move ended with task state {state}")
             time.sleep(0.1)
-        if hasattr(self.pnc, "cancel_task"):
-            try:
-                self.pnc.cancel_task()
-            except Exception as exc:
-                LOG.warning("cancel_task raised %s", exc)
+        self.cancel_chassis()
         raise Abort(f"{step.name}: relative_move did not finish within {CHASSIS_TIMEOUT:.0f} s")
 
 
@@ -286,6 +340,10 @@ def describe(step: Step) -> str:
     if step.kind == "gripper":
         state = "OPEN" if step.gripper < -0.4 else "CLOSE"
         return f"[grippers] both {state:5s} ({step.gripper:+.3f})  @ {step.name}: {step.note}"
+    if step.kind == "combo":
+        dx, dy, _ = step.rel
+        return (f"[combo  ] {step.name:22s} relative_move dx={dx:+.3f} m dy={dy:+.3f} m, arms meanwhile "
+                f"through {len(step.sub)} poses ({sum(s.duration for s in step.sub):.1f}s): {step.note}")
     if step.kind == "chassis":
         dx, dy, dyaw = step.rel
         return (f"[chassis] {step.name:22s} relative_move dx={dx:+.3f} m dy={dy:+.3f} m "
@@ -328,7 +386,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--waypoints", type=Path, required=True)
     ap.add_argument("--execute", action="store_true", help="move the real robot")
-    ap.add_argument("--speed", type=float, default=0.15, help="peak joint speed, rad/s (max 0.3)")
+    ap.add_argument("--speed", type=float, default=0.15, help="peak joint speed, rad/s (max 0.5)")
     ap.add_argument("--no-step", action="store_true", help="do not pause before each move")
     ap.add_argument("--i-have-run-this-before", action="store_true", help="required with --no-step")
     ap.add_argument("--check-joints", action="store_true")
@@ -353,8 +411,9 @@ def main(argv: list[str] | None = None) -> int:
         LOG.info("The robot must already be within %.2f rad of %s on every joint.", START_TOL, plan.moves[0].name)
         for s in steps:
             LOG.info("  %s", describe(s))
-        LOG.info("arm motion ~%.0f s at %.2f rad/s, plus %d chassis legs", sum(s.duration for s in steps), vmax,
-                 sum(1 for s in steps if s.kind == "chassis"))
+        LOG.info("arm-only motion ~%.0f s at %.2f rad/s, plus %d chassis legs (%d with the arms moving)",
+                 sum(s.duration for s in steps), vmax, sum(1 for s in steps if s.kind in ("chassis", "combo")),
+                 sum(1 for s in steps if s.kind == "combo"))
         return 0
 
     import agibot_gdk  # only available on the robot / GDK dev PC
@@ -386,7 +445,7 @@ def main(argv: list[str] | None = None) -> int:
             _require(input("The first move is NOT collision-checked. Type APPROACH to allow it: "), "APPROACH")
         _require(input(f"A move cannot be cancelled from software once sent. Keep a hand on the hardware "
                        f"E-STOP and type {ESTOP_PHRASE}: "), ESTOP_PHRASE)
-        if any(s.kind == "chassis" for s in steps):
+        if any(s.kind in ("chassis", "combo") for s in steps):
             _require(input("Chassis legs follow. Confirm the robot was relocalized on the G02 Pad and placed at "
                            "the plan's START station; type RELOCALIZED: "), "RELOCALIZED")
         for s in steps:
@@ -398,6 +457,8 @@ def main(argv: list[str] | None = None) -> int:
                 g2.set_grippers(s.gripper)
             elif s.kind == "chassis":
                 g2.relative_move(s)
+            elif s.kind == "combo":
+                g2.combo(s)
             else:
                 g2.move_joints(s)
         LOG.info("done")
