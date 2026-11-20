@@ -41,6 +41,7 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python replay.py                 # physics replay + report
 .venv/bin/mjpython view_demo.py            # interactive viewer (macOS needs mjpython)
 .venv/bin/python record_demo.py            # 1080p60 video
+DEMO_LANG=en .venv/bin/python record_demo.py   # same video, English-only overlay
 .venv/bin/python -m pytest -q gdk          # GDK runner tests (fake robot)
 ```
 
