@@ -38,6 +38,11 @@ IN = g2_model.IN
 
 FONT_CJK = "/System/Library/Fonts/Hiragino Sans GB.ttc"
 FONT_MONO = "/System/Library/Fonts/Menlo.ttc"
+EN = __import__("os").environ.get("DEMO_LANG", "zh") == "en"  # DEMO_LANG=en: English-only overlay
+
+
+def tr(zh: str, en: str) -> str:
+    return en if EN else zh
 
 STEP_TEXT = {  # name: (stage, zh, en)   6 stages
     "START": ("0", "起点：双手合拢在胸前", "Start: hands cupped together"),
@@ -225,7 +230,7 @@ def draw_minimap(draw, fonts: Fonts, base_xy_yaw, tcp_trail_in, tcp_in) -> None:
     x0, y0 = m2px(0, 160)
     x1, y1 = m2px(192, 0)
     panel(draw, [x0 - 14, y0 - 44, x1 + 14, y1 + 40])
-    draw.text((x0, y0 - 38), "俯视图 Top view (in)", font=fonts.small, fill=(255, 255, 255, 230))
+    draw.text((x0, y0 - 38), tr("俯视图 Top view (in)", "Top view (in)"), font=fonts.small, fill=(255, 255, 255, 230))
     draw.rectangle([x0, y0, x1, y1], outline=(200, 200, 200, 200), width=2)
     hb = g2_model.HOPPER_BASE
     draw.rectangle([*m2px(hb["x0"], hb["y0"] + hb["d"]), *m2px(hb["x0"] + hb["w"], hb["y0"])],
@@ -239,8 +244,8 @@ def draw_minimap(draw, fonts: Fonts, base_xy_yaw, tcp_trail_in, tcp_in) -> None:
     sb = g2_model.SOURCE_BIN
     draw.rectangle([*m2px(sb["x0"], sb["y0"] + sb["d"]), *m2px(sb["x0"] + sb["w"], sb["y0"])],
                    outline=(80, 140, 230, 255), width=3)
-    draw.text(m2px(sb["x0"] + 4, sb["y0"] + 30), "料桶", font=fonts.small, fill=(150, 190, 255, 255))
-    draw.text(m2px(hb["x0"] + 6, hb["y0"] - 4), "料斗", font=fonts.small, fill=(150, 190, 255, 255))
+    draw.text(m2px(sb["x0"] + 4, sb["y0"] + 30), tr("料桶", "Bin"), font=fonts.small, fill=(150, 190, 255, 255))
+    draw.text(m2px(hb["x0"] + 6, hb["y0"] - 4), tr("料斗", "Hopper"), font=fonts.small, fill=(150, 190, 255, 255))
     # robot footprint (760 L x 640 W mm), oriented by yaw
     bx, by, yaw = base_xy_yaw
     L, Wd = 760 / 25.4 / 2, 640 / 25.4 / 2
@@ -285,14 +290,19 @@ def draw_hud(img: Image.Image, fonts: Fonts, dbg: Debug, labels: list[tuple], ba
             tag(d, xy, text, fonts.label, placed, dot=colour)
     # top-left: title + step
     panel(d, [24, 24, 1060, 210])
-    d.text((44, 34), "G2 Scoop & Dump POC · MuJoCo", font=fonts.big, fill=(255, 255, 255, 255))
-    d.text((44, 88), "官方模型 AgibotTech/genie_sim_robot_model @fb6de33 · crs 手臂 + Omnipicker",
+    d.text((44, 34), tr("G2 Scoop & Dump POC · MuJoCo", "G2 Bimanual Scoop, Carry & Pour POC · MuJoCo"), font=fonts.big, fill=(255, 255, 255, 255))
+    d.text((44, 88), tr("官方模型 AgibotTech/genie_sim_robot_model @fb6de33 · crs 手臂 + Omnipicker",
+              "Official model AgibotTech/genie_sim_robot_model @fb6de33 · crs arms + Omnipicker"),
            font=fonts.small, fill=(190, 200, 210, 255))
     base = dbg.step.split("~")[0]
     num, zh, en = STEP_TEXT.get(base, ("", base, base))
-    via = "（避障中间点）" if "~" in dbg.step else ""
-    d.text((44, 124), f"阶段 {num}/{STAGES}  {zh}{via}", font=fonts.mid, fill=(255, 220, 90, 255))
-    d.text((44, 164), en, font=fonts.small, fill=(220, 220, 220, 255))
+    if EN:
+        via = " (collision-free via point)" if "~" in dbg.step else ""
+        d.text((44, 124), f"Stage {num}/{STAGES}  {en}{via}", font=fonts.mid, fill=(255, 220, 90, 255))
+    else:
+        via = "（避障中间点）" if "~" in dbg.step else ""
+        d.text((44, 124), f"阶段 {num}/{STAGES}  {zh}{via}", font=fonts.mid, fill=(255, 220, 90, 255))
+        d.text((44, 164), en, font=fonts.small, fill=(220, 220, 220, 255))
     # bottom-left: debug panel
     y0 = H - 330
     panel(d, [24, y0, 820, H - 24])
@@ -313,17 +323,18 @@ def draw_hud(img: Image.Image, fonts: Fonts, dbg: Debug, labels: list[tuple], ba
         d.text((44, y0 + 54 + i * 32), text, font=fonts.mono, fill=colour)
     # legend
     lx, ly = 860, H - 128
-    panel(d, [lx - 16, ly - 12, lx + 640, H - 24])
-    for i, (c, t) in enumerate((((25, 215, 90), "绿/黄/红：机器人到工位最近距离（≥8 / ≥5 / <5 cm）"),
-                                ((170, 120, 255), "紫：手臂到自身最近距离"),
-                                ((255, 220, 60), "黄 / 青线：右手 / 左手夹爪中心轨迹"))):
+    panel(d, [lx - 16, ly - 12, lx + (770 if EN else 640), H - 24])
+    for i, (c, t) in enumerate((((25, 215, 90), tr("绿/黄/红：机器人到工位最近距离（≥8 / ≥5 / <5 cm）", "Green/yellow/red: robot-to-workcell distance (≥8 / ≥5 / <5 cm)")),
+                                ((170, 120, 255), tr("紫：手臂到自身最近距离", "Purple: arm-to-body distance")),
+                                ((255, 220, 60), tr("黄 / 青线：右手 / 左手夹爪中心轨迹", "Yellow / cyan: right / left gripper path")))):
         d.rectangle([lx, ly + 6 + i * 30, lx + 26, ly + 16 + i * 30], fill=c + (255,))
         d.text((lx + 38, ly + i * 30), t, font=fonts.small, fill=(230, 230, 230, 255))
     draw_minimap(d, fonts, base_xy_yaw, trail_in, tcp_in)
     if intro is not None:
         a = int(255 * min(1.0, intro))
-        panel(d, [24, 226, 1060, 330], alpha=int(200 * min(1.0, intro)))
-        d.text((44, 236), "开到料桶 → 双手捧起 → 端着开到料斗 → 双手倒出 → 回起点", font=fonts.mid,
+        panel(d, [24, 226, 1150 if EN else 1060, 330], alpha=int(200 * min(1.0, intro)))
+        d.text((44, 236), tr("开到料桶 → 双手捧起 → 端着开到料斗 → 双手倒出 → 回起点",
+                  "Drive to bin → scoop with both hands → carry to hopper → pour → return"), font=fonts.mid,
                fill=(255, 255, 255, a))
         d.text((44, 282), "Layout: drawing G1-LAY-001 · bin 30 in (assumed) · no overhead frame at the hopper (assumed)",
                font=fonts.small, fill=(220, 220, 220, a))
@@ -377,18 +388,19 @@ def main() -> int:
     hb, hp, sb = g2_model.HOPPER_BASE, g2_model.HOPPER, g2_model.SOURCE_BIN
     static_labels = [
         (np.array([(sb["x0"] + sb["w"] / 2) * IN, (sb["y0"] + sb["d"] / 2) * IN, sb["h"] * IN]),
-         f"料桶 Source bin · 高 {sb['h']:.0f} in（假设）", (80, 140, 230, 255)),
+         tr(f"料桶 Source bin · 高 {sb['h']:.0f} in（假设）", f"Source bin · {sb['h']:.0f} in high (assumed)"), (80, 140, 230, 255)),
         (np.array([hp["cx"] * IN, (hp["cy"] + hp["inner_r"]) * IN, hp["rim"] * IN]),
-         f"料斗 Hopper · 沿高 {hp['rim']} in", (80, 140, 230, 255)),
+         tr(f"料斗 Hopper · 沿高 {hp['rim']} in", f"Hopper · rim {hp['rim']} in"), (80, 140, 230, 255)),
     ]
     if g2_model.FRAME_SLAB_IN > 0:
         static_labels.append((np.array([(hb["x0"] + 4) * IN, (hb["y0"] + hb["d"] - 4) * IN,
                                         (g2_model.FRAME_TOP_IN - g2_model.FRAME_SLAB_IN) * IN]),
-                              f"框架 Frame · 梁底 {g2_model.FRAME_TOP_IN - g2_model.FRAME_SLAB_IN:.0f} in（假设）",
+                              tr(f"框架 Frame · 梁底 {g2_model.FRAME_TOP_IN - g2_model.FRAME_SLAB_IN:.0f} in（假设）",
+                                 f"Frame · beam underside {g2_model.FRAME_TOP_IN - g2_model.FRAME_SLAB_IN:.0f} in (assumed)"),
                               (240, 150, 60, 255)))
     base_trail: list[tuple[float, float]] = []
 
-    out_path = OUT / "g2_bimanual_demo_1080p.mp4"
+    out_path = OUT / tr("g2_bimanual_demo_1080p.mp4", "g2_bimanual_demo_1080p_en.mp4")
     writer = imageio.get_writer(out_path, fps=FPS, codec="libx264", quality=None, macro_block_size=1,
                                 ffmpeg_params=["-crf", "15", "-preset", "slow", "-pix_fmt", "yuv420p",
                                                "-profile:v", "high", "-movflags", "+faststart"])
@@ -465,11 +477,11 @@ def main() -> int:
             add_line(scn, fromto_self[:3], fromto_self[3:], 0.004, (0.67, 0.47, 1.0, 0.9))
         img = Image.fromarray(renderer.render())
 
-        labels = [(project(scn, tcp), f"右手 z={tcp[2]:.2f} m", (255, 220, 60, 255)),
-                  (project(scn, tcp_l), "左手", (90, 230, 255, 255))]
+        labels = [(project(scn, tcp), tr(f"右手 z={tcp[2]:.2f} m", f"Right hand z={tcp[2]:.2f} m"), (255, 220, 60, 255)),
+                  (project(scn, tcp_l), tr("左手", "Left hand"), (90, 230, 255, 255))]
         for name, p in marks:
             if name == seg.split("~")[0]:
-                labels.append((project(scn, p), "目标点 " + STEP_TEXT[name][1].split("，")[0], (255, 120, 40, 255)))
+                labels.append((project(scn, p), (f"Target: {STEP_TEXT[name][2]}" if EN else "目标点 " + STEP_TEXT[name][1].split("，")[0]), (255, 120, 40, 255)))
         labels += [(project(scn, p), t, c) for p, t, c in static_labels]
         dbg = Debug(t=max(0.0, t_video - INTRO_S), step=seg, gripper=float(data.qpos[grip_adr]),
                     env_d=d_env, env_pair=(f"{model.body(model.geom_bodyid[ea]).name} ↔ {model.geom(eb).name}"
