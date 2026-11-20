@@ -95,27 +95,30 @@ POUR_DEG = float(os.environ.get("POUR_DEG", "55"))
 RAISE = ArmGoal("RAISE", "raise the cupped hands above the 50 in rim, below the frame", (0.42, 0.0, HAND_Z_OVER), 0.0)
 PRE_SCOOP = ArmGoal("PRE_SCOOP", "1 both hands above the bin, tilted down",
                     ((139 - BIN_STATION[0]) * IN, 0.0, RIM_BIN + 0.12), 60.0)   # base frame at BIN_STATION
+READY = ArmGoal("READY", "hands part way to the bin pose", (0.55, 0.0, 0.95), 30.0)
 # ("drive", name, note, pose[, ArmGoal]): with an ArmGoal (base frame) the arms move DURING the chassis
 # leg; the leg is checked for every combination of chassis and arm progress, and falls back to
 # "arms first, then drive" if that check fails.
 SEQUENCE: list[tuple] = [
     ("arm", ArmGoal("START", "start: hands cupped in front", CARRY.pos, 0.0), START),
-    ("drive", "TURN_TO_BIN", "turn in place to face the source bin", (START[0], START[1], 0.0)),
+    ("drive", "TURN_TO_BIN", "turn in place to face the source bin, starting to lift the hands", (START[0], START[1], 0.0),
+     READY),
     ("drive", "DRIVE_TO_BIN", "drive forward to the source bin, hands moving above the bin", BIN_STATION, PRE_SCOOP),
     ("arm", ArmGoal("SCOOP_IN", "2 dip both hands into the bin", (140 * IN, 60 * IN, RIM_BIN - 0.05), 60.0, True), None),
     ("arm", ArmGoal("SCOOP_SWEEP", "3 scoop forward, rolling the hands up", (141 * IN, 60 * IN, RIM_BIN - 0.02), 30.0, True, 0.03, 10.0), None),
-    ("arm", ArmGoal("SCOOP_LIFT", "4 lift the handful out level", (140 * IN, 60 * IN, RIM_BIN + 0.15), 0.0, True), None),
-    ("drive", "BACK_OFF", "back away from the bin, bringing the cupped hands to the chest", BIN_BACKOFF, CARRY),
-    ("drive", "TURN_AROUND", "turn around in place, holding", TURN_POINT),
+    ("arm", ArmGoal("SCOOP_LIFT", "4 lift the handful out level", (140 * IN, 60 * IN, RIM_BIN + 0.22), 0.0, True), None),
+    ("drive", "BACK_OFF", "back away from the bin, holding the handful", BIN_BACKOFF),
+    ("drive", "TURN_AROUND", "turn around in place, bringing the cupped hands to the chest", TURN_POINT, CARRY),
     ("drive", "SLIDE_TO_HOPPER", "slide sideways to the hopper, raising the cupped hands", HOP_STANDOFF, RAISE),
-    ("drive", "DOCK", "move up to the hopper with hands raised", HOP_DOCK),
-    ("arm", ArmGoal("OVER_HOPPER", "5 reach over the rim into the hopper", (63 * IN, 105.5 * IN, HAND_Z_OVER), 0.0, True), None),
+    ("drive", "DOCK", "move up to the hopper, reaching over the rim",
+     HOP_DOCK, ArmGoal("OVER_HOPPER", "5 reach over the rim into the hopper", (63 * IN, 105.5 * IN, HAND_Z_OVER), 0.0, True)),
     ("arm", ArmGoal("POUR", "6 tip both hands down into the hopper: pour", (60 * IN, 105.5 * IN, POUR_Z), POUR_DEG, True, 0.03, 12.0), None),
     ("drive", "UNDOCK", "back off from the hopper, levelling the hands and pulling them back over the rim",
      HOP_STANDOFF, ArmGoal("RETRACT", "level the hands and pull them back over the rim", RAISE.pos, 0.0)),
     ("drive", "RETURN", "slide diagonally back to the start, lowering the hands",
-     HOME_TURN, ArmGoal("LOWER", "lower to the carry posture", CARRY.pos, 0.0)),
-    ("drive", "TURN_FINAL", "turn to the start heading", START),
+     HOME_TURN, ArmGoal("HALF_LOWER", "lower the hands part way", (0.42, 0.0, 0.5 * (HAND_Z_OVER + CARRY.pos[2])), 0.0)),
+    ("drive", "TURN_FINAL", "turn to the start heading, lowering the hands to the carry posture", START,
+     ArmGoal("LOWER", "lower to the carry posture", CARRY.pos, 0.0)),
 ]
 
 
@@ -274,6 +277,17 @@ def _combo_chain(chk: ik.Checker, prev_wp: dict, q_end: dict[str, float], rep_en
     return members, worst
 
 
+def _turn_choices(prev: dict[str, float], pose: tuple[float, float, float]) -> list[dict[str, float]]:
+    """End chassis poses for a leg: the short way round (both ways for a 180 deg turn)."""
+    target_yaw = np.deg2rad(pose[2])
+    out = []
+    for k in (-1, 0, 1):
+        yaw = target_yaw + 2 * np.pi * k
+        if abs(yaw - prev["base_yaw"]) <= np.pi + 1e-6:
+            out.append(base_q(pose, yaw))
+    return out
+
+
 def relative_move(qa: dict[str, float], qb: dict[str, float]) -> dict:
     """GDK relative_move target, in the chassis frame at the start of the leg."""
     yaw0 = qa["base_yaw"]
@@ -302,7 +316,7 @@ def main() -> int:
             arms = {n: v for n, v in prev.items() if n not in ik.BASE}
             if goal is not None:
                 # arms move during the leg: solve the base-frame goal at the leg's end pose
-                bq_end = base_q(pose)
+                bq_end = _turn_choices(prev, pose)[0]
                 tg = hand_targets(goal, bq_end)
                 fixed = {**fixed_static, **bq_end}
                 q_arm = seed
@@ -313,8 +327,13 @@ def main() -> int:
                 q_end = {**fixed, **q_arm}
                 rep_end = ik.evaluate_multi(chk, q_end, tg)
                 arm_ok = rep_end.ok(next(iter(tg.values())))
-                members, pc = (_combo_chain(chk, wps[-1], q_end, rep_end, name, note, goal.name)
-                               if arm_ok else (None, None))
+                members, pc = None, None
+                for bq_try in (_turn_choices(prev, pose) if arm_ok else []):
+                    q_try = {**q_end, **bq_try}
+                    members, pc = _combo_chain(chk, wps[-1], q_try, rep_end, name, note, goal.name)
+                    if members:
+                        q_end = q_try
+                        break
                 if members:
                     seed = {n: q_end[n] for n in ik.BIMANUAL_JOINTS}
                     bq = {n: q_end[n] for n in ik.BASE}

@@ -4,8 +4,10 @@ Arm/waist/head waypoints -> Robot.joint_control_request; both Omnipickers ->
 Robot.move_ee_pos (left_tool / right_tool); chassis legs -> Pnc.relative_move
 (turns over 90 deg are split so the robot cannot choose the other direction).
 "Arms-during-drive" legs (waypoints sharing a combo_group) start the relative_move, send the
-arm poses while the chassis translates, then wait for the chassis; the planner checked those
-legs for every combination of chassis and arm progress, so their relative timing does not matter.
+arm poses while the chassis translates or turns, then wait for the chassis; the planner checked
+those legs for every combination of chassis and arm progress, so their relative timing does not
+matter. A turn split into several relative_moves starts its next part as soon as the previous
+one reports success (polled after each arm pose; no threads, GDK is never called concurrently).
 If an arm move fails during such a leg, the chassis task is cancelled.
 
 Default is a DRY RUN that only prints the plan. Real motion needs --execute plus the
@@ -87,6 +89,7 @@ class Step:
     gripper: float = 0.0
     rel: tuple[float, float, float] = (0.0, 0.0, 0.0)
     sub: tuple["Step", ...] = ()   # combo: joint steps sent while the chassis leg runs
+    legs: tuple["Step", ...] = ()  # combo: the chassis relative_moves (a long turn is split)
 
 
 @dataclass(frozen=True)
@@ -145,18 +148,17 @@ def chassis_legs(name: str, note: str, rel: tuple[float, float, float]) -> list[
 
 
 def combo_step(group: list[Move], q_prev: dict[str, float], vmax: float) -> Step:
-    """One chassis translation with the arm path (its via-points) sent while it drives."""
+    """One chassis leg (translation or turn) with the arm path (its via-points) sent while it moves."""
     last = group[-1]
     if last.rel is None or any(m.rel is not None for m in group[:-1]):
         raise Abort(f"{last.name}: only the last waypoint of an arms-during-drive leg may carry the relative_move")
-    if abs(last.rel[2]) > 1e-3:
-        raise Abort(f"{last.name}: arms may only move during a pure translation, not a turn")
     sub, q = [], q_prev
     for m in group:
         if any(abs(m.joints[n] - q[n]) > 1e-4 for n in COMMANDED):
             sub.append(_joint_step(m.name, m.note, q, m.joints, vmax))
         q = m.joints
-    return Step("combo", last.name, last.note, rel=last.rel, sub=tuple(sub))
+    legs = tuple(chassis_legs(last.name, last.note, last.rel))
+    return Step("combo", last.name, last.note, rel=last.rel, sub=tuple(sub), legs=legs)
 
 
 def plan_steps(moves: list[Move], start: dict[str, float], vmax: float) -> list[Step]:
@@ -313,15 +315,31 @@ class G2:
                 LOG.warning("cancel_task raised %s", exc)
 
     def combo(self, step: Step) -> None:
-        """Start the chassis leg, send the arm path while it drives, then wait for the chassis."""
-        self.start_relative_move(step)
+        """Start the chassis leg, send the arm path while it moves, then wait for the chassis.
+
+        A split turn starts its next part after an arm pose once the current part has finished.
+        """
+        pending = list(step.legs)
+        current = pending.pop(0)
+        self.start_relative_move(current)
         try:
             for js in step.sub:
                 self.move_joints(js)
+                if pending and self._chassis_done(current):
+                    current = pending.pop(0)
+                    self.start_relative_move(current)
         except BaseException:
             self.cancel_chassis()
             raise
-        self.wait_chassis(step)
+        self.wait_chassis(current)
+        for leg in pending:
+            self.relative_move(leg)
+
+    def _chassis_done(self, step: Step) -> bool:
+        state = self._task_state()
+        if state in (TASK_FAIL, TASK_CANCELED):
+            raise Abort(f"{step.name}: relative_move ended with task state {state}")
+        return state == TASK_SUCCESS
 
     def wait_chassis(self, step: Step) -> None:
         t0 = time.time()
@@ -341,8 +359,9 @@ def describe(step: Step) -> str:
         state = "OPEN" if step.gripper < -0.4 else "CLOSE"
         return f"[grippers] both {state:5s} ({step.gripper:+.3f})  @ {step.name}: {step.note}"
     if step.kind == "combo":
-        dx, dy, _ = step.rel
-        return (f"[combo  ] {step.name:22s} relative_move dx={dx:+.3f} m dy={dy:+.3f} m, arms meanwhile "
+        dx, dy, dyaw = step.rel
+        return (f"[combo  ] {step.name:22s} relative_move dx={dx:+.3f} m dy={dy:+.3f} m "
+                f"dyaw={math.degrees(dyaw):+6.1f} deg in {len(step.legs)} part(s), arms meanwhile "
                 f"through {len(step.sub)} poses ({sum(s.duration for s in step.sub):.1f}s): {step.note}")
     if step.kind == "chassis":
         dx, dy, dyaw = step.rel

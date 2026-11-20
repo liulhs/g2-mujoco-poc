@@ -298,9 +298,18 @@ def test_arms_move_while_chassis_translates(tmp_path: Path, monkeypatch: pytest.
     assert robot.log == ["grip:+0.000", "drive:+0.000,-1.000,+0.0", "joints:g2_poc:LEG~via", "joints:g2_poc:LEG"]
 
 
-def test_arms_may_not_move_during_a_turn(tmp_path: Path) -> None:
-    plan = rp.load_plan(_combo_doc(tmp_path, dict(dx_m=0.0, dy_m=0.0, dyaw_rad=1.0)))
-    with pytest.raises(rp.Abort, match="translation"):
+def test_arms_move_during_a_split_turn(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    robot = FakeRobot()
+    _install(monkeypatch, robot, [rp.ESTOP_PHRASE, "RELOCALIZED"] + [""] * 10)
+    assert _run(_combo_doc(tmp_path, dict(dx_m=0.0, dy_m=0.0, dyaw_rad=math.pi))) == 0
+    # second half of the turn starts as soon as the first half reports success, between arm poses
+    assert robot.log == ["grip:+0.000", "drive:+0.000,+0.000,+90.0", "joints:g2_poc:LEG~via",
+                         "drive:+0.000,+0.000,+90.0", "joints:g2_poc:LEG"]
+
+
+def test_combo_turn_still_needs_pure_rotation(tmp_path: Path) -> None:
+    plan = rp.load_plan(_combo_doc(tmp_path, dict(dx_m=0.3, dy_m=0.0, dyaw_rad=1.0)))
+    with pytest.raises(rp.Abort, match="mixes"):
         rp.plan_steps(plan.moves, plan.moves[0].joints, 0.3)
 
 

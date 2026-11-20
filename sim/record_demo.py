@@ -46,18 +46,18 @@ def tr(zh: str, en: str) -> str:
 
 STEP_TEXT = {  # name: (stage, zh, en)   6 stages
     "START": ("0", "起点：双手合拢在胸前", "Start: hands cupped together"),
-    "TURN_TO_BIN": ("1", "原地转向料桶", "Turn in place toward the bin"),
+    "TURN_TO_BIN": ("1", "原地转向料桶，同时开始抬手", "Turn toward the bin, starting to lift the hands"),
     "DRIVE_TO_BIN": ("1", "开到料桶前，同时把手伸到桶口上方", "Drive to the bin, hands moving over it"),
     "PRE_SCOOP": ("2", "双手移到桶口上方", "Both hands above the bin"),
     "SCOOP_IN": ("2", "双手伸进桶口", "Dip both hands in"),
     "SCOOP_SWEEP": ("2", "向前捧起", "Scoop forward"),
     "SCOOP_LIFT": ("2", "捧着抬起", "Lift the handful"),
     "CARRY": ("3", "双手端平，准备移动", "Hold level, ready to move"),
-    "BACK_OFF": ("3", "端着后退", "Back off, holding"),
-    "TURN_AROUND": ("3", "端着原地掉头", "Turn around in place, holding"),
+    "BACK_OFF": ("3", "端着后退", "Back off, holding the handful"),
+    "TURN_AROUND": ("3", "原地掉头，同时把手收到胸前", "Turn around, bringing the hands to the chest"),
     "SLIDE_TO_HOPPER": ("3", "端着横移到料斗，同时抬手", "Slide sideways to the hopper, raising the hands"),
     "RAISE": ("4", "双手抬过料斗沿", "Raise the hands above the rim"),
-    "DOCK": ("4", "靠近料斗", "Move up to the hopper"),
+    "DOCK": ("4", "靠近料斗，同时把手伸过料斗沿", "Move up to the hopper, reaching over the rim"),
     "OVER_HOPPER": ("4", "双手伸到料斗上方", "Reach over the hopper"),
     "POUR": ("5", "双手翻腕倒出", "Tip both hands: pour"),
     "UNPOUR": ("5", "双手放平", "Level the hands"),
@@ -69,7 +69,7 @@ STEP_TEXT = {  # name: (stage, zh, en)   6 stages
     "DRIVE_SOUTH": ("6", "向前开", "Drive forward"),
     "TURN_WEST": ("6", "原地转向起点", "Turn toward the start"),
     "DRIVE_HOME": ("6", "开回起点", "Drive back to the start"),
-    "TURN_FINAL": ("6", "转回起始朝向", "Turn to the start heading"),
+    "TURN_FINAL": ("6", "转回起始朝向，同时放到端持姿势", "Turn to the start heading, lowering to the carry posture"),
 }
 STAGES = 6
 

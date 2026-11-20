@@ -4,7 +4,7 @@ The official AgiBot G2 model (crs arms, two Omnipicker grippers) is simulated in
 
 1. Drives to a source bin.
 2. Cups a "handful" with both hands. The closed grippers are held side by side, so this is a demo posture with no real material.
-3. Keeps both hands in the carry posture while the chassis backs off, turns around and slides sideways to the hopper (the swerve base translates in any direction).
+3. Backs off, turns around while bringing the hands to the chest, and slides sideways to the hopper while raising them (the swerve base translates in any direction).
 4. Pours with both hands.
 5. Returns to the start.
 
@@ -25,12 +25,12 @@ The following values are **assumptions** until they are measured on site:
 
 | Check | Result |
 |---|---|
-| Plan | 54 waypoints, all checks pass (`all_ok`) |
+| Plan | 43 waypoints, all checks pass (`all_ok`) |
 | Clearance limits | ≥5 cm to the workcell, ≥2 cm self-clearance, AgiBot coupled-joint limits, torso tilt ≤10° |
-| Physics replay | **49.3 s** cycle, 0 contacts, min 5.8 cm to the workcell, min 2.6 cm self-clearance, max tracking error 0.037 rad |
+| Physics replay | **42.8 s** cycle, 0 contacts, min 5.8 cm to the workcell, min 2.3 cm self-clearance, max tracking error 0.037 rad |
 | Speeds (sim) | joints 0.5 rad/s; chassis 0.5 m/s, 1.0 rad/s, ramps 0.5 m/s², 1 rad/s² |
 | Chassis | Every leg is a pure turn in place or a pure translation (`Pnc.relative_move`) |
-| Arms during driving | 4 legs move the arms while the chassis translates; checked for every combination of chassis and arm progress, so relative timing does not matter |
+| Arms during chassis motion | 8 of 9 chassis legs (turns included) move the arms at the same time; checked for every combination of chassis and arm progress, so relative timing does not matter. Only the scoop and the pour run with the chassis stopped |
 
 The speeds are environment variables of `replay.py`, `view_demo.py` and `record_demo.py`:
 `MAX_JOINT_SPEED`, `BODY_JOINT_SPEED`, `BASE_LIN_SPEED`, `BASE_YAW_SPEED`, `BASE_LIN_ACCEL`, `BASE_YAW_ACCEL`.
