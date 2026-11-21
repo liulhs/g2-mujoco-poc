@@ -84,5 +84,6 @@ The following are **not done yet**:
 - `sim/legacy_single_arm/`: the earlier single-arm plan, now superseded.
 - `docs/G2_POC_plan.md`: the plan notes, in Chinese.
 - `docs/HANDOFF.md`: handoff notes for the scripts (Chinese).
+- `docs/AGENT_HANDOFF_G2_GDK.md`: real-robot test guide for an agent on the G2 over SSH, covering the three plan versions in release v0.1 (Chinese).
 
 See `THIRD_PARTY_NOTICES.md` for the official model, `coupled_constraints.yaml` and GDK licensing.
