@@ -1,9 +1,9 @@
 {
-  "duration_s": 42.8,
+  "duration_s": 47.9,
   "max_joint_speed_rad_s": 0.5,
   "body_joint_speed_rad_s": 0.5,
   "max_tracking_error_rad": 0.0367,
-  "max_tracking_error_at": "UNDOCK~via@33.4s",
+  "max_tracking_error_at": "UNDOCK~via@38.2s",
   "max_chassis_tracking_error": 0.0978,
   "chassis_speed": {
     "linear_m_s": 0.5,
@@ -16,9 +16,9 @@
   "frame_beam_in": 0.0,
   "robot_workcell_contacts": {},
   "robot_self_contacts": {},
-  "min_env_clearance_m": 0.058,
-  "min_env_at": "gripper_l_camera_link<->bin_wall_w SCOOP_SWEEP~via@9.2s",
-  "min_self_clearance_m": 0.0227,
-  "min_self_at": "arm_l_link7<->arm_r_link7 POUR~via@27.3s",
+  "min_env_clearance_m": 0.0581,
+  "min_env_at": "gripper_l_camera_link<->bin_wall_w SCOOP_SWEEP~via@14.0s",
+  "min_self_clearance_m": 0.0254,
+  "min_self_at": "arm_l_link7<->arm_r_link7 TURN_FINAL~via@45.0s",
   "video": "out/poc_replay_bimanual_plan.mp4"
 }

@@ -27,12 +27,17 @@ def _doc(tmp_path: Path, all_ok: bool = True, arm: str = "crs", measured: bool =
     return p
 
 
+SERVO_MODE = 5  # GDK 2.6.3 reports mode=5 (G2 servo) on the real robot
+
+
 class FakeRobot:
-    def __init__(self, arm_type: str | None = "crs", mode: int = 1, rc: int = 0, gripper_works: bool = True) -> None:
+    def __init__(self, arm_type: str | None = "crs", mode: int = SERVO_MODE, rc: int = 0,
+                 gripper_works: bool = True, end_model: str | None = "omnipicker") -> None:
         self.q = {n: 0.0 for n in rp.COMMANDED}
         self.grip = 0.0
         self.log: list[str] = []
         self.arm_type, self.mode, self.rc, self.gripper_works = arm_type, mode, rc, gripper_works
+        self.end_model = end_model
 
     def get_joint_states(self) -> dict:
         return {"states": [{"name": n, "motor_position": v} for n, v in self.q.items()]}
@@ -60,28 +65,40 @@ class FakeRobot:
         st = {"right_arm_error": 0, "right_arm_estop": False}
         if self.arm_type:
             st["right_arm_type"] = self.arm_type
+        if self.end_model:
+            st["left_end_model"] = st["right_end_model"] = self.end_model
         return st
 
     def get_motion_control_status(self):
-        return types.SimpleNamespace(error_code=0, error_msg="", control_mode=self.mode)
+        # GDK 2.6.3: the field is `mode`; there is no `control_mode`
+        return types.SimpleNamespace(error_code=0, error_msg="", mode=self.mode)
 
-    def set_control_mode(self, mode: int) -> int:
-        self.mode = mode
-        self.log.append(f"mode:{mode}")
+    def set_control_mode(self, mode) -> int:
+        self.log.append(f"mode:{mode}")  # the runner must never call this
         return 0
 
 
 class FakePnc:
-    def __init__(self, robot: FakeRobot, final_state: int = 9) -> None:
-        self.robot, self.final_state = robot, final_state
+    """Starts with a stale cancelled task (state 7), as seen on the robot; a new task id
+    appears `lag` polls after relative_move."""
+
+    def __init__(self, robot: FakeRobot, final_state: int = 9, lag: int = 0) -> None:
+        self.robot, self.final_state, self.lag = robot, final_state, lag
+        self.id, self.state, self.pending = 1498285016, rp.TASK_CANCELED, None
 
     def relative_move(self, req) -> None:
         dyaw = 2 * math.atan2(req.target.orientation.z, req.target.orientation.w)
         self.robot.log.append(f"drive:{req.target.position.x:+.3f},{req.target.position.y:+.3f},"
                               f"{math.degrees(dyaw):+.1f}")
+        self.pending = self.lag
 
-    def get_task_state(self) -> dict:
-        return {"state": self.final_state}
+    def get_task_state(self):
+        if self.pending is not None:
+            if self.pending == 0:
+                self.id, self.state, self.pending = self.id + 1, self.final_state, None
+            else:
+                self.pending -= 1
+        return types.SimpleNamespace(id=self.id, state=self.state, type=3)
 
     def cancel_task(self) -> None:
         self.robot.log.append("cancel")
@@ -92,12 +109,13 @@ def _navi_req():
                                                               orientation=types.SimpleNamespace(z=0.0, w=1.0)))
 
 
-def _install(monkeypatch: pytest.MonkeyPatch, robot: FakeRobot, answers: list[str], pnc_state: int = 9) -> None:
+def _install(monkeypatch: pytest.MonkeyPatch, robot: FakeRobot, answers: list[str], pnc_state: int = 9,
+             pnc_lag: int = 0) -> None:
     class Obj:
         pass
     gdk = types.SimpleNamespace(GDKRes=types.SimpleNamespace(kSuccess=0), gdk_init=lambda: 0,
                                 gdk_release=lambda: None, Robot=lambda: robot,
-                                Pnc=lambda: FakePnc(robot, pnc_state), NaviReq=_navi_req,
+                                Pnc=lambda: FakePnc(robot, pnc_state, pnc_lag), NaviReq=_navi_req,
                                 JointControlReq=Obj, JointState=Obj, JointStates=Obj)
     monkeypatch.setitem(sys.modules, "agibot_gdk", gdk)
     monkeypatch.setattr(rp.time, "sleep", lambda s: None)
@@ -106,7 +124,8 @@ def _install(monkeypatch: pytest.MonkeyPatch, robot: FakeRobot, answers: list[st
 
 
 def _run(path: Path, *extra: str) -> int:
-    return rp.main(["--waypoints", str(path), "--execute", "--speed", "0.3", *extra])
+    return rp.main(["--waypoints", str(path), "--execute", "--speed", "0.3",
+                    "--control-mode", str(SERVO_MODE), *extra])
 
 
 def test_refuses_unvalidated_plan(tmp_path: Path) -> None:
@@ -138,11 +157,41 @@ def test_execute_happy_path(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> 
     assert robot.q["idx05_body_joint5"] == pytest.approx(-0.3)
 
 
-def test_switches_to_position_mode(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_refuses_other_control_mode_and_never_switches(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     robot = FakeRobot(mode=2)
     _install(monkeypatch, robot, [rp.ESTOP_PHRASE] + [""] * 10)
-    assert _run(_doc(tmp_path)) == 0
-    assert robot.log[0] == "mode:1"
+    assert _run(_doc(tmp_path)) == 2
+    assert robot.log == []
+
+
+def test_needs_control_mode_flag(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    robot = FakeRobot()
+    _install(monkeypatch, robot, [rp.ESTOP_PHRASE] + [""] * 10)
+    assert rp.main(["--waypoints", str(_doc(tmp_path)), "--execute"]) == 2
+    assert robot.log == []
+
+
+def test_refuses_when_mode_field_missing(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    robot = FakeRobot()
+    robot.get_motion_control_status = lambda: types.SimpleNamespace(error_code=0, error_msg="")
+    _install(monkeypatch, robot, [rp.ESTOP_PHRASE] + [""] * 10)
+    assert _run(_doc(tmp_path)) == 2
+    assert robot.log == []
+
+
+def test_refuses_dexterous_hands(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    robot = FakeRobot(end_model="o10_t2")
+    _install(monkeypatch, robot, [rp.ESTOP_PHRASE] + [""] * 10)
+    assert _run(_doc(tmp_path)) == 2
+    assert robot.log == []
+
+
+def test_needs_confirm_end_effector_when_not_reported(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    robot = FakeRobot(end_model=None)
+    _install(monkeypatch, robot, [rp.ESTOP_PHRASE] + [""] * 10)
+    assert _run(_doc(tmp_path)) == 2
+    _install(monkeypatch, robot, [rp.ESTOP_PHRASE] + [""] * 10)
+    assert _run(_doc(tmp_path), "--confirm-end-effector", "omnipicker") == 0
 
 
 def test_refuses_when_not_at_first_pose(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -163,6 +212,14 @@ def test_approach_home_needs_typed_confirmation_and_is_slow(tmp_path: Path, monk
     assert max(first.velocities) <= rp.APPROACH_SPEED + 1e-9
     assert _run(_doc(tmp_path), "--approach-home") == 0
     assert robot.log[0] == "joints:g2_poc:HOME"
+
+
+def test_approach_home_refuses_large_gap(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    robot = FakeRobot()
+    robot.q["idx61_arm_r_joint1"] = -2.67  # e.g. the plan sits on the other shoulder branch
+    _install(monkeypatch, robot, ["APPROACH", rp.ESTOP_PHRASE] + [""] * 10)
+    assert _run(_doc(tmp_path), "--approach-home") == 2
+    assert robot.log == []
 
 
 def test_refuses_wrong_arm_type(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -277,6 +334,44 @@ def test_chassis_failure_stops_the_run(tmp_path: Path, monkeypatch: pytest.Monke
     robot = FakeRobot()
     _install(monkeypatch, robot, [rp.ESTOP_PHRASE, "RELOCALIZED"] + [""] * 10, pnc_state=8)
     assert _run(_drive_doc(tmp_path, dict(dx_m=0.7, dy_m=0.0, dyaw_rad=0.0))) == 2
+    assert robot.log[-1] == "cancel"
+
+
+def test_stale_task_state_is_ignored_until_new_task_appears(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    robot = FakeRobot()  # the Pnc starts on an old cancelled task (state 7)
+    _install(monkeypatch, robot, [rp.ESTOP_PHRASE, "RELOCALIZED"] + [""] * 10, pnc_lag=3)
+    assert _run(_drive_doc(tmp_path, dict(dx_m=0.7, dy_m=0.0, dyaw_rad=0.0))) == 0
+    assert "cancel" not in robot.log
+
+
+def test_cancels_when_no_new_task_appears(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    robot = FakeRobot()
+    _install(monkeypatch, robot, [rp.ESTOP_PHRASE, "RELOCALIZED"] + [""] * 10, pnc_lag=10_000)
+    t = iter(range(100_000))
+    monkeypatch.setattr(rp.time, "time", lambda: next(t) * 0.1)
+    assert _run(_drive_doc(tmp_path, dict(dx_m=0.7, dy_m=0.0, dyaw_rad=0.0))) == 2
+    assert robot.log[-2:] == ["drive:+0.700,+0.000,+0.0", "cancel"]
+
+
+def test_chassis_timeout_cancels(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    robot = FakeRobot()
+    _install(monkeypatch, robot, [rp.ESTOP_PHRASE, "RELOCALIZED"] + [""] * 10, pnc_state=2)  # still running
+    t = iter(range(100_000))
+    monkeypatch.setattr(rp.time, "time", lambda: next(t) * 1.0)
+    assert _run(_drive_doc(tmp_path, dict(dx_m=0.7, dy_m=0.0, dyaw_rad=0.0))) == 2
+    assert robot.log[-1] == "cancel"
+
+
+def test_ctrl_c_during_a_leg_cancels_the_chassis(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    robot = FakeRobot()
+    _install(monkeypatch, robot, [rp.ESTOP_PHRASE, "RELOCALIZED"] + [""] * 10, pnc_state=2)
+
+    def interrupt(s: float) -> None:
+        if s < 1.0:  # the chassis poll, not the DDS discovery wait in G2.__init__
+            raise KeyboardInterrupt
+    monkeypatch.setattr(rp.time, "sleep", interrupt)
+    assert _run(_drive_doc(tmp_path, dict(dx_m=0.7, dy_m=0.0, dyaw_rad=0.0))) == 130
+    assert robot.log[-1] == "cancel"
 
 
 def _combo_doc(tmp_path: Path, rel: dict) -> Path:
@@ -318,3 +413,14 @@ def test_chassis_is_cancelled_when_an_arm_move_fails(tmp_path: Path, monkeypatch
     _install(monkeypatch, robot, [rp.ESTOP_PHRASE, "RELOCALIZED"] + [""] * 10)
     assert _run(_combo_doc(tmp_path, dict(dx_m=0.5, dy_m=0.0, dyaw_rad=0.0))) == 2
     assert robot.log[-2:] == ["joints:g2_poc:LEG~via", "cancel"]
+
+
+def test_until_stops_after_named_waypoint(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    robot = FakeRobot()
+    _install(monkeypatch, robot, [rp.ESTOP_PHRASE] + [""] * 10)
+    assert _run(_doc(tmp_path), "--accept-assumed-layout", "--until", "A") == 0
+    assert robot.log == ["grip:+0.000", "joints:g2_poc:A", "grip:-0.785"]
+
+
+def test_until_unknown_waypoint_refused(tmp_path: Path) -> None:
+    assert rp.main(["--waypoints", str(_doc(tmp_path)), "--until", "NOPE"]) == 2

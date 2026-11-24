@@ -45,6 +45,7 @@ def tr(zh: str, en: str) -> str:
     return en if EN else zh
 
 STEP_TEXT = {  # name: (stage, zh, en)   6 stages
+    "RESET": ("0", "复位姿态（真机开机姿态）", "Reset pose (the robot's power-on pose)"),
     "START": ("0", "起点：双手合拢在胸前", "Start: hands cupped together"),
     "TURN_TO_BIN": ("1", "原地转向料桶，同时开始抬手", "Turn toward the bin, starting to lift the hands"),
     "DRIVE_TO_BIN": ("1", "开到料桶前，同时把手伸到桶口上方", "Drive to the bin, hands moving over it"),
@@ -418,7 +419,7 @@ def main() -> int:
             mujoco.mj_step(model, data)
             q_ref, seg = replay.target_at(keys, data.time)
         if t_video < INTRO_S:
-            seg = "START"
+            seg = "RESET"
         # debug measurements on the live state
         chk.data.qpos[:] = data.qpos
         mujoco.mj_kinematics(model, chk.data)

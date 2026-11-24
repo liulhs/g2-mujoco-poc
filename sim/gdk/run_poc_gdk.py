@@ -16,19 +16,28 @@ safety confirmations below; every move waits for Enter unless --no-step is allow
     python run_poc_gdk.py --waypoints ../out/bimanual_plan.json                  # dry run
     python run_poc_gdk.py --waypoints ... --execute --speed 0.15                  # real robot
     python run_poc_gdk.py --waypoints ... --check-joints                          # sign check
+    python run_poc_gdk.py --waypoints ... --execute --until START                 # staged: stop after START
 
 Safety gates on --execute:
 - the plan file must be marked all_ok by the simulator;
 - the layout in the plan must be marked measured (or --accept-assumed-layout);
 - the robot's arm type must match the plan (read from GDK, or --confirm-arm);
-- the robot must already be within 0.05 rad of the plan's first pose (or --approach-home);
+- both end effectors must be the plan's (Omnipicker; read from GDK, or --confirm-end-effector);
+- the motion control mode read from GDK must equal --control-mode; the script never switches modes;
+- the robot must already be within 0.05 rad of the plan's first pose (or --approach-home, only for
+  joints within 0.5 rad: a bigger gap usually means a different IK branch, not a small offset);
 - the operator types ESTOP-READY: a move cannot be cancelled from software once sent;
 - for chassis legs: the operator confirms G02 Pad relocalization (RELOCALIZED) and that the
   robot was placed at the plan's START station; relative_move stops at obstacles, never avoids them.
 
+Chassis legs: the task id is read before each relative_move and only the new task's state is
+trusted (get_task_state can still show an earlier task); any abort or Ctrl-C while a leg may be
+running calls Pnc.cancel_task first.
+
 API used (GDK 2.6.x / 3.3.x Python): gdk_init/gdk_release, Robot.get_joint_states,
 Robot.joint_control_request(JointControlReq), Robot.move_ee_pos(JointStates),
-Robot.get_end_state, get_whole_body_status, get_motion_control_status, set_control_mode.
+Robot.get_end_state, get_whole_body_status, get_motion_control_status (`mode`),
+Pnc.relative_move/get_task_state/cancel_task.
 """
 from __future__ import annotations
 
@@ -53,10 +62,12 @@ COMMANDED = BODY + HEAD + ARM_L + ARM_R
 MAX_SPEED = 0.5            # rad/s, upper bound regardless of --speed (the plan is physics-replayed at 0.5)
 APPROACH_SPEED = 0.1       # rad/s, for the optional unchecked move to the first pose
 START_TOL = 0.05           # rad, robot must be this close to the first waypoint
+MAX_APPROACH_DELTA = 0.5   # rad, largest per-joint gap --approach-home will close (it is not collision-checked)
 REACHED_TOL = 0.02         # rad, post-move check
 GRIPPER_TOL = 0.08         # rad
 GRIPPER_TIMEOUT = 2.0      # s
 CHASSIS_TIMEOUT = 60.0     # s per relative_move leg
+TASK_START_TIMEOUT = 3.0   # s for get_task_state to show the new leg's task id
 MAX_TURN = 1.5708 + 1e-6   # rad, longest single relative_move rotation
 TASK_SUCCESS, TASK_FAIL, TASK_CANCELED = 9, 8, 7
 ESTOP_PHRASE = "ESTOP-READY"
@@ -96,6 +107,7 @@ class Step:
 class Plan:
     moves: list[Move]
     expected_arm: str
+    expected_end_effector: str
     layout_measured: bool
     source: Path
 
@@ -119,7 +131,7 @@ def load_plan(path: Path) -> Plan:
             raise Abort(f"drive waypoint {w['name']} has no relative_move")
         moves.append(Move(w["name"], w.get("note", ""), {n: float(w["joints"][n]) for n in COMMANDED},
                           float(w["gripper"]), w.get("kind", "arm"), rel, w.get("combo_group")))
-    return Plan(moves, doc["expected_arm"], bool(doc.get("layout", {}).get("measured")), path)
+    return Plan(moves, doc["expected_arm"], doc.get("expected_end_effector", "omnipicker"), bool(doc.get("layout", {}).get("measured")), path)
 
 
 def synced_velocities(q0: dict[str, float], q1: dict[str, float], vmax: float) -> tuple[tuple[float, ...], float]:
@@ -190,6 +202,17 @@ def plan_steps(moves: list[Move], start: dict[str, float], vmax: float) -> list[
     return steps
 
 
+def truncate_until(steps: list[Step], until: str | None) -> list[Step]:
+    """Keep the steps up to and including the last one that reaches waypoint `until` (staged testing)."""
+    if until is None:
+        return steps
+    hits = [i for i, s in enumerate(steps) if s.name.split("[")[0] == until]
+    if not hits:
+        names = list(dict.fromkeys(s.name.split("[")[0] for s in steps if "~via" not in s.name))
+        raise Abort(f"--until {until}: no such step; choose one of {names}")
+    return steps[:hits[-1] + 1]
+
+
 def start_deviation(start: dict[str, float], first: Move) -> dict[str, float]:
     return {n: start[n] - first.joints[n] for n in COMMANDED if abs(start[n] - first.joints[n]) > START_TOL}
 
@@ -209,22 +232,36 @@ class G2:
             raise Abort("gdk_init failed: check cable, 10.42.1.x address and `source env.sh`")
         self.robot = gdk.Robot()
         self.pnc = gdk.Pnc() if hasattr(gdk, "Pnc") else None
+        self.required_mode: int | None = None
+        self.task_id: int | None = None   # id of the chassis task this script started last
         time.sleep(2.0)  # let DDS discovery finish
 
-    def ensure_position_mode(self) -> None:
-        mode = getattr(self.robot.get_motion_control_status(), "control_mode", None)
-        LOG.info("control_mode before start: %s", mode)
-        if mode == 1:
-            return
-        if not hasattr(self.robot, "set_control_mode"):
-            raise Abort(f"robot is in control_mode {mode} and this GDK has no set_control_mode")
-        rc = self.robot.set_control_mode(1)
-        if rc not in (None, 0):
-            raise Abort(f"set_control_mode(1) returned {rc}")
-        time.sleep(0.3)
-        mode = getattr(self.robot.get_motion_control_status(), "control_mode", 1)
-        if mode != 1:
-            raise Abort(f"control_mode is {mode} after set_control_mode(1)")
+    def control_mode(self) -> int:
+        """Current motion control mode: `mode` in GDK 2.6.x, `control_mode` in some other builds."""
+        mc = _as_dict(self.robot.get_motion_control_status())
+        for key in ("mode", "control_mode"):
+            if mc.get(key) is not None:
+                return int(mc[key])
+        raise Abort(f"get_motion_control_status() has no mode field ({sorted(mc)}); cannot check the control mode")
+
+    def mode_names(self) -> str:
+        enum = getattr(self.gdk, "MotionControlMode", None)
+        members = getattr(enum, "__members__", None)
+        if not members:
+            return "(this GDK does not expose MotionControlMode)"
+        return ", ".join(f"{int(v)}={k}" for k, v in members.items())
+
+    def require_control_mode(self, required: int | None) -> None:
+        """Never switch modes: the operator states which mode joint_control_request is meant for."""
+        mode = self.control_mode()
+        LOG.info("motion control mode: %s; GDK modes: %s", mode, self.mode_names())
+        if required is None:
+            raise Abort(f"robot is in motion control mode {mode}. Confirm that joint_control_request is meant to "
+                        f"be used in this mode, then pass --control-mode {mode}")
+        if mode != required:
+            raise Abort(f"robot is in motion control mode {mode}, not {required} (--control-mode); "
+                        "this script does not switch modes")
+        self.required_mode = required
 
     def close(self) -> None:
         try:
@@ -235,6 +272,10 @@ class G2:
     def arm_types(self) -> dict[str, Any]:
         wb = _as_dict(self.robot.get_whole_body_status())
         return {k: wb[k] for k in ("right_arm_type", "left_arm_type", "urdf_type") if k in wb}
+
+    def end_models(self) -> dict[str, Any]:
+        wb = _as_dict(self.robot.get_whole_body_status())
+        return {k: wb[k] for k in ("left_end_model", "right_end_model") if k in wb}
 
     def joint_positions(self) -> dict[str, float]:
         js = self.robot.get_joint_states()
@@ -248,11 +289,11 @@ class G2:
         wb = _as_dict(self.robot.get_whole_body_status())
         errs = {k: v for k, v in wb.items() if k.endswith("_error") and v}
         estop = {k: v for k, v in wb.items() if k.endswith("_estop") and v}
-        mc = self.robot.get_motion_control_status()
-        mode = getattr(mc, "control_mode", 1)
-        if errs or estop or getattr(mc, "error_code", 0) or mode != 1:
+        mc = _as_dict(self.robot.get_motion_control_status())
+        mode = self.control_mode()
+        if errs or estop or mc.get("error_code") or mode != self.required_mode:
             raise Abort(f"robot not ready: errors={errs} estop={estop} mode={mode} "
-                        f"mc={getattr(mc, 'error_msg', '')}")
+                        f"(required {self.required_mode}) mc={mc.get('error_msg', '')}")
 
     def move_joints(self, step: Step) -> None:
         req = self.gdk.JointControlReq()
@@ -287,25 +328,51 @@ class G2:
             time.sleep(0.05)
         raise Abort(f"grippers did not reach {value:.3f} (now {self.gripper_positions()})")
 
-    def _task_state(self) -> int:
+    def _task(self) -> tuple[int | None, int]:
+        """(task id, state) from Pnc.get_task_state; id is None if this GDK does not report one."""
         st = self.pnc.get_task_state()
         if isinstance(st, int):
-            return st
+            return None, st
         d = _as_dict(st)
-        return int(d.get("state", d.get("task_state", -1)))
+        tid = d.get("id", d.get("task_id"))
+        return (None if tid is None else int(tid)), int(d.get("state", d.get("task_state", -1)))
+
+    def _leg_state(self, step: Step) -> int:
+        tid, state = self._task()
+        if tid != self.task_id:
+            raise Abort(f"{step.name}: chassis task changed from {self.task_id} to {tid} while the leg ran")
+        return state
 
     def relative_move(self, step: Step) -> None:
-        self.start_relative_move(step)
-        self.wait_chassis(step)
+        try:
+            self.start_relative_move(step)
+            self.wait_chassis(step)
+        except BaseException:
+            self.cancel_chassis()
+            raise
 
     def start_relative_move(self, step: Step) -> None:
+        """Send one leg and wait until get_task_state reports its (new) task id."""
         if self.pnc is None:
             raise Abort("this GDK build has no Pnc client; cannot drive the chassis")
+        old_id, old_state = self._task()
+        if old_id is None:
+            raise Abort("Pnc.get_task_state() reports no task id, so this leg's state cannot be told apart "
+                        "from an earlier task's; refusing to drive")
         dx, dy, dyaw = step.rel
         req = self.gdk.NaviReq()
         req.target.position.x, req.target.position.y = dx, dy
         req.target.orientation.z, req.target.orientation.w = math.sin(dyaw / 2), math.cos(dyaw / 2)
         self.pnc.relative_move(req)  # no return value; raises on failure; returns while the leg runs
+        t0 = time.time()
+        while time.time() - t0 < TASK_START_TIMEOUT:
+            tid, _ = self._task()
+            if tid != old_id:
+                self.task_id = tid
+                return
+            time.sleep(0.05)
+        raise Abort(f"{step.name}: get_task_state still shows the earlier task {old_id} (state {old_state}) "
+                    f"{TASK_START_TIMEOUT:.0f} s after relative_move")
 
     def cancel_chassis(self) -> None:
         if self.pnc is not None and hasattr(self.pnc, "cancel_task"):
@@ -320,37 +387,35 @@ class G2:
         A split turn starts its next part after an arm pose once the current part has finished.
         """
         pending = list(step.legs)
-        current = pending.pop(0)
-        self.start_relative_move(current)
         try:
+            current = pending.pop(0)
+            self.start_relative_move(current)
             for js in step.sub:
                 self.move_joints(js)
                 if pending and self._chassis_done(current):
                     current = pending.pop(0)
                     self.start_relative_move(current)
+            self.wait_chassis(current)
+            for leg in pending:
+                self.start_relative_move(leg)
+                self.wait_chassis(leg)
         except BaseException:
             self.cancel_chassis()
             raise
-        self.wait_chassis(current)
-        for leg in pending:
-            self.relative_move(leg)
 
     def _chassis_done(self, step: Step) -> bool:
-        state = self._task_state()
+        state = self._leg_state(step)
         if state in (TASK_FAIL, TASK_CANCELED):
             raise Abort(f"{step.name}: relative_move ended with task state {state}")
         return state == TASK_SUCCESS
 
     def wait_chassis(self, step: Step) -> None:
+        """Callers cancel the chassis task when this raises."""
         t0 = time.time()
         while time.time() - t0 < CHASSIS_TIMEOUT:
-            state = self._task_state()
-            if state == TASK_SUCCESS:
+            if self._chassis_done(step):
                 return
-            if state in (TASK_FAIL, TASK_CANCELED):
-                raise Abort(f"{step.name}: relative_move ended with task state {state}")
             time.sleep(0.1)
-        self.cancel_chassis()
         raise Abort(f"{step.name}: relative_move did not finish within {CHASSIS_TIMEOUT:.0f} s")
 
 
@@ -385,6 +450,20 @@ def verify_arm(g2: G2, plan: Plan, confirm_arm: str | None) -> None:
                     "after checking the arm (upper arm ~287 mm crs vs ~332 mm crsB)")
 
 
+def verify_end_effector(g2: G2, plan: Plan, confirm: str | None) -> None:
+    models = g2.end_models()
+    LOG.info("robot reports end effectors: %s", models or "(not exposed by this GDK)")
+    want = plan.expected_end_effector.lower()
+    if models:
+        wrong = {k: v for k, v in models.items() if want not in str(v).lower()}
+        if wrong:
+            raise Abort(f"plan was made for {plan.expected_end_effector} end effectors but robot reports {models}; "
+                        "gripper commands and collision checks do not apply")
+    elif confirm != plan.expected_end_effector:
+        raise Abort(f"GDK does not report the end effectors; pass --confirm-end-effector "
+                    f"{plan.expected_end_effector} after checking both hands")
+
+
 def check_joints(g2: G2, delta: float = 0.05) -> None:
     """Jog each commanded joint toward the middle of its travel and back, to confirm sign."""
     base = g2.joint_positions()
@@ -410,7 +489,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--i-have-run-this-before", action="store_true", help="required with --no-step")
     ap.add_argument("--check-joints", action="store_true")
     ap.add_argument("--confirm-arm", choices=["crs", "crsB"])
+    ap.add_argument("--confirm-end-effector", choices=["omnipicker"])
+    ap.add_argument("--control-mode", type=int,
+                    help="motion control mode (get_motion_control_status().mode) the robot must already be in")
     ap.add_argument("--accept-assumed-layout", action="store_true")
+    ap.add_argument("--until", metavar="WAYPOINT",
+                    help="stop after the step that reaches this waypoint (e.g. START), for staged testing")
     ap.add_argument("--approach-home", action="store_true",
                     help="allow an UNCHECKED slow joint move from the current pose to the first waypoint")
     args = ap.parse_args(argv)
@@ -424,7 +508,11 @@ def main(argv: list[str] | None = None) -> int:
     vmax = min(max(args.speed, 0.02), MAX_SPEED)
 
     if not args.execute and not args.check_joints:
-        steps = plan_steps(plan.moves, plan.moves[0].joints, vmax)
+        try:
+            steps = truncate_until(plan_steps(plan.moves, plan.moves[0].joints, vmax), args.until)
+        except Abort as exc:
+            LOG.error("ABORT: %s", exc)
+            return 2
         LOG.info("DRY RUN: %s, planned for the %s arm, layout measured: %s", plan.source.name,
                  plan.expected_arm, plan.layout_measured)
         LOG.info("The robot must already be within %.2f rad of %s on every joint.", START_TOL, plan.moves[0].name)
@@ -442,9 +530,10 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     g2 = G2(agibot_gdk)
     try:
-        g2.ensure_position_mode()
+        g2.require_control_mode(args.control_mode)
         g2.check_ok()
         verify_arm(g2, plan, args.confirm_arm)
+        verify_end_effector(g2, plan, args.confirm_end_effector)
         if args.check_joints:
             check_joints(g2)
             return 0
@@ -458,10 +547,16 @@ def main(argv: list[str] | None = None) -> int:
             LOG.warning("robot is not at %s: %s", plan.moves[0].name, {k: round(v, 3) for k, v in dev.items()})
             if not args.approach_home:
                 raise Abort("bring the robot to the first pose first (or pass --approach-home)")
+            far = {k: round(v, 3) for k, v in dev.items() if abs(v) > MAX_APPROACH_DELTA}
+            if far:
+                raise Abort(f"--approach-home only closes gaps up to {MAX_APPROACH_DELTA} rad; these joints are "
+                            f"further off: {far}. A gap this large usually means the plan uses a different IK "
+                            "branch than the robot; report it instead of moving there")
             first = _joint_step(plan.moves[0].name, "UNCHECKED approach to first pose", start,
                                 plan.moves[0].joints, APPROACH_SPEED)
             steps = [first] + plan_steps(plan.moves, plan.moves[0].joints, vmax)
             _require(input("The first move is NOT collision-checked. Type APPROACH to allow it: "), "APPROACH")
+        steps = truncate_until(steps, args.until)
         _require(input(f"A move cannot be cancelled from software once sent. Keep a hand on the hardware "
                        f"E-STOP and type {ESTOP_PHRASE}: "), ESTOP_PHRASE)
         if any(s.kind in ("chassis", "combo") for s in steps):

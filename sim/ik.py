@@ -39,10 +39,28 @@ MAX_TORSO_TILT = np.deg2rad(10.0)
 LIMIT_MARGIN = 0.03        # rad, stay off the hard joint limits (GDK soft limits sit there)
 
 
+# Shoulder branch. The shoulder axes j1..j3 intersect, so (j1 - pi, -j2, j3 + pi) puts the hand in the
+# same pose; the IK must pick the branch the real robot uses. On the robot's reset pose (read with
+# GDK, 2026-11-23) both arms have j2 = -1.571: L = (1.571, -1.571, -1.571, -1.571, 0, 0, 0),
+# R = (-1.571, -1.571, 1.571, -1.571, 0, 0, 0). Keeping j2 < 0 keeps the plan on that branch; on the
+# other one the right arm sat ~3 rad away from the robot's pose in every joint j1..j3.
+RESET_POSE = {
+    **dict(zip(ARM_L, (1.571, -1.571, -1.571, -1.571, 0.0, 0.0, 0.0))),
+    **dict(zip(ARM_R, (-1.571, -1.571, 1.571, -1.571, 0.0, 0.0, 0.0))),
+}
+SHOULDER_J2 = (ARM_L[1], ARM_R[1])
+SHOULDER_J2_MAX = -0.05    # rad, also keeps the IK off the j2 = 0 shoulder singularity
+
+
 def bounds(model: mujoco.MjModel, names: list[str]) -> tuple[np.ndarray, np.ndarray]:
     lo = np.array([model.jnt_range[model.joint(n).id][0] for n in names]) + LIMIT_MARGIN
     hi = np.array([model.jnt_range[model.joint(n).id][1] for n in names]) - LIMIT_MARGIN
+    hi = np.array([min(h, SHOULDER_J2_MAX) if n in SHOULDER_J2 else h for n, h in zip(names, hi)])
     return lo, hi
+
+
+def on_robot_branch(q: dict[str, float]) -> bool:
+    return all(q[n] < 0.0 for n in SHOULDER_J2 if n in q)
 
 
 def _side(body_name: str) -> str:

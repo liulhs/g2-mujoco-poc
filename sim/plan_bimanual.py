@@ -1,6 +1,6 @@
 """Plan the bimanual cup-carry-pour POC with a driving chassis.
 
-Sequence (like a person): drive to the source bin, cup a handful with BOTH hands
+Sequence (like a person): from the robot's reset pose bring the hands to the chest, drive to the source bin, cup a handful with BOTH hands
 (closed Omnipickers side by side), hold the cupping posture while the chassis backs off,
 turns and drives to the hopper, raise both hands over the 50 in rim (under the frame),
 pour with both wrists, then drive back.
@@ -99,7 +99,11 @@ READY = ArmGoal("READY", "hands part way to the bin pose", (0.55, 0.0, 0.95), 30
 # ("drive", name, note, pose[, ArmGoal]): with an ArmGoal (base frame) the arms move DURING the chassis
 # leg; the leg is checked for every combination of chassis and arm progress, and falls back to
 # "arms first, then drive" if that check fails.
+# ("reset", name, note, pose): the robot's own reset pose (ik.RESET_POSE, waist upright) at that chassis
+# pose. The plan starts here so the reset -> START arm move is collision-checked (with via-points if
+# needed) instead of being left to the runner's unchecked --approach-home.
 SEQUENCE: list[tuple] = [
+    ("reset", "RESET", "robot reset pose (both arms j2 = -1.571), as read on the robot", START),
     ("arm", ArmGoal("START", "start: hands cupped in front", CARRY.pos, 0.0), START),
     ("drive", "TURN_TO_BIN", "turn in place to face the source bin, starting to lift the hands", (START[0], START[1], 0.0),
      READY),
@@ -300,15 +304,21 @@ def relative_move(qa: dict[str, float], qb: dict[str, float]) -> dict:
 def main() -> int:
     chk = ik.Checker(g2_model.build_model())
     fixed_static = {**HEAD, ik.GRIP_L: GRIP, ik.GRIP_R: GRIP}
+    # seed from the robot's own reset pose: START then sits near it (the IK is regularised toward the seed)
     seed = {n: 0.0 for n in ik.BIMANUAL_JOINTS}
-    seed.update({"idx22_arm_l_joint2": -1.0, "idx24_arm_l_joint4": -1.5,
-                 "idx62_arm_r_joint2": 1.0, "idx64_arm_r_joint4": -1.5})
+    seed.update(ik.RESET_POSE)
     wps: list[dict] = []
     all_ok = True
     bq = base_q(START)
     for item in SEQUENCE:
         kind = item[0]
-        if kind == "drive":
+        if kind == "reset":
+            _, name, note, pose = item
+            bq = base_q(pose)
+            q = {**fixed_static, **bq, **{n: 0.0 for n in ik.BODY}, **ik.RESET_POSE}
+            rep = ik.evaluate_multi(chk, q)
+            wps.append(_waypoint(chk, name, note, "arm", q, rep, rep.ok()))
+        elif kind == "drive":
             _, name, note, pose = item[:4]
             goal = item[4] if len(item) > 4 else None
             target_yaw = np.deg2rad(pose[2])
@@ -433,10 +443,16 @@ def main() -> int:
         if not ok:
             print(f"  FAIL {a['name']} -> {b['name']} ({b['kind']}): {pc}", flush=True)
 
+    off_branch = [w["name"] for w in final if not ik.on_robot_branch(w["joints"])]
+    if off_branch:
+        all_ok = False
+        print(f"  FAIL shoulder branch differs from the robot's (j2 >= 0) at {off_branch}", flush=True)
+
     OUT.mkdir(exist_ok=True)
     doc = dict(
         task="bimanual cup-carry-pour with driving chassis", robot=f"AgiBot G2, {g2_model.ARM} arms, Omnipicker x2",
-        expected_arm=g2_model.ARM,
+        expected_arm=g2_model.ARM, expected_end_effector="omnipicker",
+        robot_reset_pose=ik.RESET_POSE,
         model_source=dict(repo="github.com/AgibotTech/genie_sim_robot_model", commit=g2_model.OFFICIAL_COMMIT,
                           xacro=f"robots/genie/g2/g2_{g2_model.ARM}_omnipicker.urdf.xacro", collision_type="fine"),
         units=dict(joints="rad", base_x_y="m (world, room origin)", base_yaw="rad",
